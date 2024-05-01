@@ -1,0 +1,25 @@
+[build-system]
+requires = ["maturin>=0.14,<2"]
+build-backend = "maturin"
+
+[project]
+name = "tcrdist_rs"
+description = "Fast tcrdist routines between TCR sequences."
+readme = "README.md"
+authors = [
+    { name = "Zachary Montague" }
+]
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+repository = "https://github.com/zacmon/tcrdist_rs"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]

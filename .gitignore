@@ -1,0 +1,14 @@
+debug/
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+*.DS_Store
+*.so
+*.swp
+*.pyc
+*~
+build/
+dist/
+.ipynb_checkpoints/
+.cache
