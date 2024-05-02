@@ -1265,6 +1265,7 @@ fn tcrdist_gene_many_to_many(
 }
 #[cfg(all(feature = "py_binds", feature = "pyo3"))]
 #[pymodule]
+#[pyo3(name = "tcrdist_rs")]
 pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(hamming, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_matrix, m)?)?;
