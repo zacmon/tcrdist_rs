@@ -6,7 +6,7 @@ mod match_table;
 
 use crate::distance as _distance;
 
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 use pyo3::prelude::*;
 use triple_accel;
 
@@ -36,7 +36,7 @@ pub use match_table::{
 /// >>> s1 = "abcdefg"
 /// >>> s2 = "abddefg"
 /// >>> assert(hamming(s1, s2) == 1)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
     Ok(triple_accel::hamming(&s1.as_bytes(), &s2.as_bytes()))
@@ -63,7 +63,7 @@ fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
 /// --------
 /// >>> seqs = ["abc", "abd", "fcd"]
 /// >>> assert(hamming_matrix(seqs, parallel=False) == [1, 3, 2])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::hamming_matrix(&seqs, parallel))
@@ -93,7 +93,7 @@ fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// >>> seq = "abb"
 /// >>> seqs = ["abc", "abd", "fcd"]
 /// >>> assert(hamming_one_to_many(seq, seqs, parallel=False) == [1, 1, 3])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::hamming_one_to_many(&seq, &seqs, parallel))
@@ -123,7 +123,7 @@ fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<V
 /// >>> seqs1 = ["abb", "abc"]
 /// >>> seqs2 = ["abc", "abd", "fcd"]
 /// >>> assert(hamming_many_to_many(seqs1, seqs2, parallel=False) == [1, 1, 3, 0, 1, 3])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::hamming_many_to_many(&seqs1, &seqs2, parallel))
@@ -150,7 +150,7 @@ fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> P
 /// >>> s1 = "abcdefg"
 /// >>> s2 = "abdcd defgggg"
 /// >>> assert(levenshtein(s1, s2) == 6)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
     Ok(triple_accel::levenshtein(&s1.as_bytes(), &s2.as_bytes()))
@@ -177,7 +177,7 @@ fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
 /// --------
 /// >>> seqs = ["Monday", "Tuesday", "Wednesday", "Thursday"]
 /// >>> assert(levenshtein_matrix(seqs, parallel=False) == [4, 5, 5, 4, 2, 5])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_matrix(&seqs, parallel))
@@ -207,7 +207,7 @@ fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// >>> seq = "Sunday"
 /// >>> seqs = ["Monday", "Tuesday", "Wednesday", "Thursday"]
 /// >>> assert(levenshtein_one_to_many(seq, seqs, parallel=False) == [2, 3, 5, 4])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_one_to_many(&seq, &seqs, parallel))
@@ -236,7 +236,7 @@ fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResu
 /// >>> seqs1 = ["Sunday", "Saturday"]
 /// >>> seqs2 = ["Monday", "Tuesday", "Wednesday"]
 /// >>> assert(levenshtein_many_to_many(seqs1, seqs2, parallel=False) == [2, 3, 5, 5, 5, 6])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein_many_to_many(
     seqs1: Vec<&str>,
@@ -271,7 +271,7 @@ fn levenshtein_many_to_many(
 /// >>> s1 = "abcdefg"
 /// >>> s2 = "abdcd defgggg"
 /// >>> assert(levenshtein_exp(s1, s2) == 6)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
     Ok(triple_accel::levenshtein_exp(
@@ -303,7 +303,7 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
 /// --------
 /// >>> seqs = ["Monday", "Tuesday", "Wednesday", "Thursday"]
 /// >>> assert(levenshtein_exp_matrix(seqs, parallel=False) == [4, 5, 5, 4, 2, 5])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_exp_matrix(&seqs, parallel))
@@ -335,7 +335,7 @@ fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>>
 /// >>> seq = "Sunday"
 /// >>> seqs = ["Monday", "Tuesday", "Wednesday", "Thursday"]
 /// >>> assert(levenshtein_one_to_many(seq, seqs, parallel=False) == [2, 3, 5, 4])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_exp_one_to_many(
@@ -368,7 +368,7 @@ fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> Py
 /// >>> seqs1 = ["Sunday", "Saturday"]
 /// >>> seqs2 = ["Monday", "Tuesday", "Wednesday"]
 /// >>> assert(levenshtein_many_to_many(seqs1, seqs2, parallel=False) == [2, 3, 5, 5, 5, 6])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn levenshtein_exp_many_to_many(
     seqs1: Vec<&str>,
@@ -402,7 +402,7 @@ fn levenshtein_exp_many_to_many(
 /// >>> s1 = "C"
 /// >>> s2 = "a"
 /// >>> assert(amino_acid_distance(s1, s2) == 4)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn amino_acid_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(amino_distances(&s1.as_bytes()[0], &s2.as_bytes()[0]))
@@ -427,7 +427,7 @@ fn amino_acid_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// >>> s1 = "C"
 /// >>> s2 = "a"
 /// >>> assert(amino_acid_distance(s1, s2) == 4)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn v_gene_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(gene_distance(&s1.as_bytes(), &s2.as_bytes()))
@@ -455,7 +455,7 @@ fn v_gene_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// s1 = "TRBV2*01"
 /// s2 = "TRBV6-2*01"
 /// assert(phmc_distance(s1, s2) == 16)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn phmc_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(phmc_distances(s1.as_bytes(), s2.as_bytes()))
@@ -483,7 +483,7 @@ fn phmc_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// s1 = "TRBV2*01"
 /// s2 = "TRBV6-2*01"
 /// assert(cdr1_distance(s1, s2) == 8)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn cdr1_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(cdr1_distances(s1.as_bytes(), s2.as_bytes()))
@@ -511,7 +511,7 @@ fn cdr1_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// >>> s1 = "TRBV2*01"
 /// >>> s2 = "TRBV6-2*01"
 /// >>> assert(cdr2_distance(s1, s2) == 24)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn cdr2_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(cdr2_distances(s1.as_bytes(), s2.as_bytes()))
@@ -559,7 +559,7 @@ fn cdr2_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// >>> fixed_gappos = False
 /// >>> dist = tcrdist(s1, s2, dist_weight, gap_penalty, ntrim, ctrim, fixed_gappos)
 /// >>> assert(dist == 40)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist(
     s1: &str,
@@ -623,7 +623,7 @@ fn tcrdist(
 /// >>> dist = tcrdist_matrix(seqs, dist_weight, gap_penalty, ntrim, ctrim, fixed_gappos,
 /// parallel=False)
 /// >>> assert(dist == [40, 28, 28, 40, 40, 19])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_matrix(
     seqs: Vec<&str>,
@@ -691,7 +691,7 @@ fn tcrdist_matrix(
 /// >>> dist = tcrdist_one_to_many(seq, seqs, dist_weight, gap_penalty, ntrim, ctrim, fixed_gappos,
 /// parallel=False)
 /// >>> assert(dist == [52, 41, 52, 48])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_one_to_many(
     seq: &str,
@@ -759,7 +759,7 @@ fn tcrdist_one_to_many(
 /// >>> fixed_gappos = False
 /// >>> dist = tcrdist_many_to_many(seqs1, seqs2, dist_weight, gap_penalty, ntrim, ctrim, fixed_gappos, parallel=False)
 /// >>> assert(dist == [52, 41, 52, 48])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_many_to_many(
     seqs1: Vec<&str>,
@@ -832,7 +832,7 @@ fn tcrdist_many_to_many(
 /// >>> fixed_gappos = False
 /// >>> dist = tcrdist_allele(s1, s2, phmc_weight, cdr1_weight, cdr2_weight, cdr3_weight, gap_penalty, ntrim, ctrim, fixed_gappos)
 /// >>> assert(dist == 168)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_allele(
     s1: [&str; 2],
@@ -910,7 +910,7 @@ fn tcrdist_allele(
 /// >>> fixed_gappos = False
 /// >>> dist = tcrdist_allele_matrix(seqs, phmc_weight, cdr1_weight, cdr2_weight, cdr3_weight, gap_penalty, ntrim, ctrim, fixed_gappos, parallel=False)
 /// >>> assert(dist == [168, 142, 134, 203, 163, 169, 148, 116, 189, 198])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_allele_matrix(
     seqs: Vec<[&str; 2]>,
@@ -988,7 +988,7 @@ fn tcrdist_allele_matrix(
 /// >>> fixed_gappos = False
 /// >>> dist = tcrdist_allele_one_to_many(seq, seqs, phmc_weight, cdr1_weight, cdr2_weight, cdr3_weight, gap_penalty, ntrim, ctrim, fixed_gappos, parallel=False)
 /// >>> assert(dist == [168, 142, 134, 203])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_allele_one_to_many(
     seq: [&str; 2],
@@ -1070,7 +1070,7 @@ fn tcrdist_allele_one_to_many(
 /// >>> fixed_gappos = False
 /// >>> dist = tcrdist_allele_many_to_many(seqs1, seqs2, phmc_weight, cdr1_weight, cdr2_weight, cdr3_weight, gap_penalty, ntrim, ctrim, fixed_gappos, parallel=False)
 /// >>> assert(dist == [168, 142, 134, 203, 104, 125, 143, 121])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_allele_many_to_many(
     seqs1: Vec<[&str; 2]>,
@@ -1128,7 +1128,7 @@ fn tcrdist_allele_many_to_many(
 /// >>> ctrim = 2
 /// >>> dist = tcrdist_gene(s1, s2, ntrim, ctrim)
 /// >>> assert(dist == 168)
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyResult<u16> {
     Ok(_distance::tcrdist_gene(s1, s2, ntrim, ctrim))
@@ -1163,7 +1163,7 @@ fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyR
 /// >>> ctrim = 2
 /// >>> dist = tcrdist_gene_matrix(seqs, ntrim, ctrim, parallel=False)
 /// >>> assert(dist == [168, 142, 134, 203, 163, 169, 148, 116, 189, 198])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_gene_matrix(
     seqs: Vec<[&str; 2]>,
@@ -1206,7 +1206,7 @@ fn tcrdist_gene_matrix(
 /// >>> ctrim = 2
 /// >>> dist = tcrdist_gene_one_to_many(seq, seqs, ntrim, ctrim, parallel=False)
 /// >>> assert(dist == [168, 142, 134, 203])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_gene_one_to_many(
     seq: [&str; 2],
@@ -1250,7 +1250,7 @@ fn tcrdist_gene_one_to_many(
 /// >>> ctrim = 2
 /// >>> dist = tcrdist_gene_many_to_many(seqs1, seqs2, ntrim, ctrim, parallel=False)
 /// >>> assert(dist == [168, 142, 134, 203, 104, 125, 143, 121])
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+#[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn tcrdist_gene_many_to_many(
     seqs1: Vec<[&str; 2]>,
@@ -1263,7 +1263,7 @@ fn tcrdist_gene_many_to_many(
         &seqs1, &seqs2, ntrim, ctrim, parallel,
     ))
 }
-#[cfg(all(feature = "py_binds", feature = "pyo3"))]
+
 #[pymodule]
 #[pyo3(name = "tcrdist_rs")]
 pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {

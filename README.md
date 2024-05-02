@@ -31,7 +31,7 @@ pip install maturin
 To compile tcrdist, run
 
 ```bash
-maturin develop --release -F py_binds,pyo3 --profile release
+maturin develop --release --profile release
 ```
 
 ## Example
