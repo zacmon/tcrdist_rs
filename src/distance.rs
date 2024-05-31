@@ -616,7 +616,7 @@ pub fn tcrdist_gene_matrix(
     }
 }
 
-/// Compute the full tcrdist between a CDR3-V gene allele array and many others.
+/// Compute the full tcrdist between a CDR3-V gene array and many others.
 pub fn tcrdist_gene_one_to_many(
     seq: [&str; 2],
     seqs: &[[&str; 2]],
@@ -637,7 +637,7 @@ pub fn tcrdist_gene_one_to_many(
     }
 }
 
-/// Compute the full tcrdist between many CDR3-V gene allele arrays and many others.
+/// Compute the full tcrdist between many CDR3-V gene arrays and many others.
 pub fn tcrdist_gene_many_to_many(
     seqs1: &[[&str; 2]],
     seqs2: &[[&str; 2]],
@@ -667,6 +667,131 @@ pub fn tcrdist_gene_many_to_many(
                         .iter()
                         .map(|&s2| tcrdist_gene(s1, s2, ntrim, ctrim))
                         .collect::<Vec<u16>>()
+                })
+                .collect()
+        })
+    }
+}
+
+/// Compute whether two CDR3-V gene arrays are tcrdist-gene neighbors.
+pub fn tcrdist_gene_neighbor(
+    s1: [&str; 2],
+    s2: [&str; 2],
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+) -> bool {
+    let s1_bytes: &[u8] = s1[0].as_bytes();
+    let s2_bytes: &[u8] = s2[0].as_bytes();
+    let s1_len: usize = s1_bytes.len();
+    let s2_len: usize = s2_bytes.len();
+    let len_diff: u16 = if s1_len > s2_len {
+        (s1_len - s2_len) as u16
+    } else {
+        (s2_len - s1_len) as u16
+    };
+
+    // Gap penalty is 12. Stop computation if lengths are too different.
+    if len_diff * 12 > threshold {
+        return false;
+    }
+
+    // Stop computation if V gene distance and length difference are too different.
+    let v_gene_dist = match_table::gene_distance(s1[1].as_bytes(), s2[1].as_bytes());
+    if v_gene_dist + len_diff > threshold {
+        return false;
+    }
+
+    (v_gene_dist + 3 * tcrdist(s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false)) <= threshold
+}
+
+pub fn tcrdist_gene_neighbor_matrix(
+    seqs: &[[&str; 2]],
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> Vec<bool> {
+    if parallel == false {
+        let seqs_len: usize = seqs.len();
+        let num_combinations: usize = seqs_len * (seqs_len - 1) / 2;
+        let mut dists: Vec<bool> = vec![false; num_combinations];
+        let mut counter: usize = 0;
+
+        for (i, &s1) in seqs.iter().enumerate() {
+            for &s2 in seqs[i + 1..].iter() {
+                dists[counter] = tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim);
+                counter += 1;
+            }
+        }
+
+        dists
+    } else {
+        POOL.install(|| {
+            seqs.par_iter()
+                .enumerate()
+                .flat_map(|(i, &s1)| {
+                    seqs[i + 1..]
+                        .iter()
+                        .map(|&s2| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
+                        .collect::<Vec<bool>>()
+                })
+                .collect()
+        })
+    }
+}
+
+pub fn tcrdist_gene_neighbor_one_to_many(
+    seq: [&str; 2],
+    seqs: &[[&str; 2]],
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> Vec<bool> {
+    if parallel == false {
+        seqs.iter()
+            .map(|&s| tcrdist_gene_neighbor(seq, s, threshold, ntrim, ctrim))
+            .collect()
+    } else {
+        POOL.install(|| {
+            seqs.par_iter()
+                .map(|&s| tcrdist_gene_neighbor(seq, s, threshold, ntrim, ctrim))
+                .collect::<Vec<bool>>()
+        })
+    }
+}
+
+pub fn tcrdist_gene_neighbor_many_to_many(
+    seqs1: &[[&str; 2]],
+    seqs2: &[[&str; 2]],
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> Vec<bool> {
+    if parallel == false {
+        let seqs1_len: usize = seqs1.len();
+        let seqs2_len: usize = seqs2.len();
+        let mut dists: Vec<bool> = vec![false; seqs1_len * seqs2_len];
+        let mut counter: usize = 0;
+
+        for &s1 in seqs1.iter() {
+            for &s2 in seqs2.iter() {
+                dists[counter] = tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim);
+                counter += 1;
+            }
+        }
+        dists
+    } else {
+        POOL.install(|| {
+            seqs1
+                .par_iter()
+                .flat_map(|&s1| {
+                    seqs2
+                        .iter()
+                        .map(|&s2| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
+                        .collect::<Vec<bool>>()
                 })
                 .collect()
         })

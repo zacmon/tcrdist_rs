@@ -3,7 +3,6 @@
 //! A library for computing the distances between immune cell receptors.
 mod distance;
 mod match_table;
-
 use crate::distance as _distance;
 
 #[cfg(all(feature = "pyo3"))]
@@ -65,6 +64,7 @@ fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
 /// >>> assert(hamming_matrix(seqs, parallel=False) == [1, 3, 2])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs, parallel=false))]
 fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::hamming_matrix(&seqs, parallel))
 }
@@ -80,7 +80,7 @@ fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 ///     The string against which all others will be compared.
 /// seqs : iterable of str
 ///     The other strings being compared.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -95,6 +95,7 @@ fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// >>> assert(hamming_one_to_many(seq, seqs, parallel=False) == [1, 1, 3])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seq, seqs, parallel=false))]
 fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::hamming_one_to_many(&seq, &seqs, parallel))
 }
@@ -110,7 +111,7 @@ fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<V
 ///     The first iterable of strings.
 /// seqs2 : iterable of str
 ///     The other iterable of strings.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -125,6 +126,7 @@ fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<V
 /// >>> assert(hamming_many_to_many(seqs1, seqs2, parallel=False) == [1, 1, 3, 0, 1, 3])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
 fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::hamming_many_to_many(&seqs1, &seqs2, parallel))
 }
@@ -165,7 +167,7 @@ fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
 /// seqs : iterable str
 ///     The strings to be compared. The must have an appropriate representation
 ///     as byte strings.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -179,6 +181,7 @@ fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
 /// >>> assert(levenshtein_matrix(seqs, parallel=False) == [4, 5, 5, 4, 2, 5])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs, parallel=false))]
 fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_matrix(&seqs, parallel))
 }
@@ -194,7 +197,7 @@ fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 ///     The string against which all others will be compared.
 /// seqs : iterable of str
 ///     The other strings being compared.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -209,6 +212,7 @@ fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// >>> assert(levenshtein_one_to_many(seq, seqs, parallel=False) == [2, 3, 5, 4])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seq, seqs, parallel=false))]
 fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_one_to_many(&seq, &seqs, parallel))
 }
@@ -223,7 +227,7 @@ fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResu
 ///     The first iterable of strings.
 /// seqs : iterable of str
 ///     The second iterable of strings.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -238,6 +242,7 @@ fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResu
 /// >>> assert(levenshtein_many_to_many(seqs1, seqs2, parallel=False) == [2, 3, 5, 5, 5, 6])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
 fn levenshtein_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -291,7 +296,7 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
 /// seqs : iterable str
 ///     The strings to be compared. The must have an appropriate representation
 ///     as byte strings.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -305,6 +310,7 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
 /// >>> assert(levenshtein_exp_matrix(seqs, parallel=False) == [4, 5, 5, 4, 2, 5])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs, parallel=false))]
 fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_exp_matrix(&seqs, parallel))
 }
@@ -322,7 +328,7 @@ fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>>
 ///     The string against which all others will be compared.
 /// seqs : iterable of str
 ///     The other strings being compared.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -337,6 +343,7 @@ fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>>
 /// >>> assert(levenshtein_one_to_many(seq, seqs, parallel=False) == [2, 3, 5, 4])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seq, seqs, parallel=false))]
 fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::levenshtein_exp_one_to_many(
         &seq, &seqs, parallel,
@@ -355,7 +362,7 @@ fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> Py
 ///     The first iterable of strings.
 /// seqs : iterable of str
 ///     The second iterable of strings.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -370,6 +377,7 @@ fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> Py
 /// >>> assert(levenshtein_many_to_many(seqs1, seqs2, parallel=False) == [2, 3, 5, 5, 5, 6])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
 fn levenshtein_exp_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -527,18 +535,18 @@ fn cdr2_distance(s1: &str, s2: &str) -> PyResult<u16> {
 ///     A string. Ideally, this should be a string of amino acid residues.
 /// s2 : str
 ///     A string. Ideally, this should be a string of amino acid residues.
-/// dist_weight : int
+/// dist_weight : int, default 1
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, default False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
@@ -561,6 +569,7 @@ fn cdr2_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// >>> assert(dist == 40)
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (s1, s2, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false))]
 fn tcrdist(
     s1: &str,
     s2: &str,
@@ -589,22 +598,22 @@ fn tcrdist(
 /// ----------
 /// seqs : iterable of str
 ///     Iterable of strings.
-/// dist_weight : int
+/// dist_weight : int, default 1
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, default False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -625,6 +634,7 @@ fn tcrdist(
 /// >>> assert(dist == [40, 28, 28, 40, 40, 19])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
 fn tcrdist_matrix(
     seqs: Vec<&str>,
     dist_weight: u16,
@@ -656,22 +666,22 @@ fn tcrdist_matrix(
 ///     The string against which all others will be compared.
 /// seqs : str
 ///     The other strings being compared.
-/// dist_weight : int
+/// dist_weight : int, default 1
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, default False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -693,6 +703,7 @@ fn tcrdist_matrix(
 /// >>> assert(dist == [52, 41, 52, 48])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seq, seqs, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
 fn tcrdist_one_to_many(
     seq: &str,
     seqs: Vec<&str>,
@@ -725,22 +736,22 @@ fn tcrdist_one_to_many(
 ///     The first iterable of strings.
 /// seqs2 : iterable of str
 ///     The other iterable of strings.
-/// dist_weight : int
+/// dist_weight : int, default 1
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, default False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -761,6 +772,7 @@ fn tcrdist_one_to_many(
 /// >>> assert(dist == [52, 41, 52, 48])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
 fn tcrdist_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -782,6 +794,7 @@ fn tcrdist_many_to_many(
         parallel,
     ))
 }
+
 /// Compute the tcrdist between two CDR3-V allele pairs.
 ///
 /// This incorporates differences between the pMHC, CDR1, CDR2, and CDR3.
@@ -792,23 +805,23 @@ fn tcrdist_many_to_many(
 ///     An iterable of the CDR3 amino acid sequence and V allele.
 /// s2 : iterable of str
 ///     An iterable of the CDR3 amino acid sequence and V allele.
-/// phmc_weight : int
+/// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
-/// cdr1_weight : int
+/// cdr1_weight : int, default 1
 ///     How much the difference in CDR1s contributes to the distance.
-/// cdr2_weight : int
+/// cdr2_weight : int, default 1
 ///     How much the difference in CDR2s contributes to the distance.
-/// cdr3_weight : int
+/// cdr3_weight : int, default 3
 ///     How much the difference in CDR3s contributes to the distance.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, default False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
@@ -834,6 +847,7 @@ fn tcrdist_many_to_many(
 /// >>> assert(dist == 168)
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (s1, s2, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false))]
 fn tcrdist_allele(
     s1: [&str; 2],
     s2: [&str; 2],
@@ -869,27 +883,27 @@ fn tcrdist_allele(
 /// ----------
 /// seqs : iterable of iterable of str
 ///     An iterable containing iterables of CDR3 amino acid sequences and V alleles.
-/// phmc_weight : int
+/// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
-/// cdr1_weight : int
+/// cdr1_weight : int, default 1
 ///     How much the difference in CDR1s contributes to the distance.
-/// cdr2_weight : int
+/// cdr2_weight : int, default 1
 ///     How much the difference in CDR2s contributes to the distance.
-/// cdr3_weight : int
+/// cdr3_weight : int, default 3
 ///     How much the difference in CDR3s contributes to the distance.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, default False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -912,6 +926,7 @@ fn tcrdist_allele(
 /// >>> assert(dist == [168, 142, 134, 203, 163, 169, 148, 116, 189, 198])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
 fn tcrdist_allele_matrix(
     seqs: Vec<[&str; 2]>,
     phmc_weight: u16,
@@ -948,26 +963,28 @@ fn tcrdist_allele_matrix(
 ///     An iterable containing a CDR3 amino acid sequence and V allele.
 /// seqs : iterable of iterable of str
 ///     An iterable of iterables containing pairs of CDR3 amino acid sequences and V alleles.
-/// phmc_weight : int
+/// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
-/// cdr1_weight : int
+/// cdr1_weight : int, default 1
 ///     How much the difference in CDR1s contributes to the distance.
-/// cdr2_weight : int
+/// cdr2_weight : int, default 1
 ///     How much the difference in CDR2s contributes to the distance.
-/// cdr3_weight : int
+/// cdr3_weight : int, default 3
 ///     How much the difference in CDR3s contributes to the distance.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
 /// -------
@@ -990,6 +1007,7 @@ fn tcrdist_allele_matrix(
 /// >>> assert(dist == [168, 142, 134, 203])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seq, seqs, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
 fn tcrdist_allele_one_to_many(
     seq: [&str; 2],
     seqs: Vec<[&str; 2]>,
@@ -1028,27 +1046,27 @@ fn tcrdist_allele_one_to_many(
 ///     An iterable of iterables containing pairs of CDR3 amino acid sequences and V alleles.
 /// seqs2 : iterable of iterable of str
 ///     An iterable of iterables containing pairs of CDR3 amino acid sequences and V alleles.
-/// phmc_weight : int
+/// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
-/// cdr1_weight : int
+/// cdr1_weight : int, default 1
 ///     How much the difference in CDR1s contributes to the distance.
-/// cdr2_weight : int
+/// cdr2_weight : int, default 1
 ///     How much the difference in CDR2s contributes to the distance.
-/// cdr3_weight : int
+/// cdr3_weight : int, default 3
 ///     How much the difference in CDR3s contributes to the distance.
-/// gap_penalty : int
+/// gap_penalty : int, default 4
 ///     The penalty given to the difference in length of the strings.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// fixed_gappos : bool
+/// fixed_gappos : bool, False
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1072,6 +1090,7 @@ fn tcrdist_allele_one_to_many(
 /// >>> assert(dist == [168, 142, 134, 203, 104, 125, 143, 121])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
 fn tcrdist_allele_many_to_many(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1108,10 +1127,10 @@ fn tcrdist_allele_many_to_many(
 ///     An iterable containing a CDR3 amino acid sequence and V gene pair.
 /// s2 : iterable of str
 ///     An iterable containing a CDR3 amino acid sequence and V gene pair.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
 ///
@@ -1122,14 +1141,15 @@ fn tcrdist_allele_many_to_many(
 ///
 /// Examples
 /// --------
-/// >>> s1 = ["CASRTGTVYEQYF", "TRBV2*01"]
-/// >>> s2 = ["CASSTLDRVYNSPLHF", "TRBV6-2*01"]
+/// >>> s1 = ["CASRTGTVYEQYF", "TRBV2"]
+/// >>> s2 = ["CASSTLDRVYNSPLHF", "TRBV6-2"]
 /// >>> ntrim = 3
 /// >>> ctrim = 2
 /// >>> dist = tcrdist_gene(s1, s2, ntrim, ctrim)
 /// >>> assert(dist == 168)
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (s1, s2, ntrim=3, ctrim=2))]
 fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyResult<u16> {
     Ok(_distance::tcrdist_gene(s1, s2, ntrim, ctrim))
 }
@@ -1142,13 +1162,13 @@ fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyR
 /// ----------
 /// seqs : iterable of iterable of str
 ///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1165,6 +1185,7 @@ fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyR
 /// >>> assert(dist == [168, 142, 134, 203, 163, 169, 148, 116, 189, 198])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs, ntrim=3, ctrim=2, parallel=false))]
 fn tcrdist_gene_matrix(
     seqs: Vec<[&str; 2]>,
     ntrim: usize,
@@ -1184,13 +1205,13 @@ fn tcrdist_gene_matrix(
 ///     An iterable containing a CDR3 amino acid sequence and V allele pair.
 /// seqs : iterable of iterable of str
 ///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1208,6 +1229,7 @@ fn tcrdist_gene_matrix(
 /// >>> assert(dist == [168, 142, 134, 203])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seq, seqs, ntrim=3, ctrim=2, parallel=false))]
 fn tcrdist_gene_one_to_many(
     seq: [&str; 2],
     seqs: Vec<[&str; 2]>,
@@ -1228,13 +1250,13 @@ fn tcrdist_gene_one_to_many(
 ///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
 /// seqs2 : iterable of iterable of str
 ///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
-/// ntrim : int
+/// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
-/// ctrim : int
+/// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// parallel: bool
+/// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1252,6 +1274,7 @@ fn tcrdist_gene_one_to_many(
 /// >>> assert(dist == [168, 142, 134, 203, 104, 125, 143, 121])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
 fn tcrdist_gene_many_to_many(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1261,6 +1284,104 @@ fn tcrdist_gene_many_to_many(
 ) -> PyResult<Vec<u16>> {
     Ok(_distance::tcrdist_gene_many_to_many(
         &seqs1, &seqs2, ntrim, ctrim, parallel,
+    ))
+}
+
+/// Compute whether two CDR3-V gene pairs are neighbors with tcrdist_gene.
+///
+/// This function is quicker than using the tcrdist_gene function since it computes
+/// whether the V genes are within the distance threshold and whether the difference
+/// in lengths won't incur a penalty larger than the distance threshold. With these
+/// two checks, many unnecessary calculations are avoided.
+///
+/// Parameters
+/// ----------
+/// s1 : iterable of str
+///     An iterable containing a CDR3 amino acid sequence and V gene pair.
+/// s2 : iterable of str
+///     An iterable containing a CDR3 amino acid sequence and V gene pair.
+/// threshold: int
+///     The distance threshold that will be used to call sequences neighbors.
+/// ntrim : int, default 3
+///     The position at which the distance calculation will begin.
+///     This parameter must be >= 0.
+/// ctrim : int, default 2
+///     The position, counted from the end, at which the calculation will end.
+    ///     This parameter must be >= 0.
+///
+/// Returns
+/// -------
+/// bool 
+///     Whether the two CDR3-V gene pairs are have tcrdist within the threshold.
+///
+/// Examples
+/// --------
+/// >>> s1 = ["CASRTGTVYEQYF", "TRBV2"]
+/// >>> s2 = ["CASSTLDRVYNSPLHF", "TRBV6-2"]
+/// >>> threshold = 20
+/// >>> ntrim = 3
+/// >>> ctrim = 2
+/// >>> are_neighbors = tcrdist_gene(s1, s2, threshold, ntrim, ctrim)
+/// >>> assert(are_neighbors == False)
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (s1, s2, threshold, ntrim=3, ctrim=2))]
+fn tcrdist_gene_neighbor(
+    s1: [&str; 2],
+    s2: [&str; 2],
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+) -> PyResult<bool> {
+    Ok(_distance::tcrdist_gene_neighbor(
+        s1, s2, threshold, ntrim, ctrim,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_gene_neighbor_matrix(
+    seqs: Vec<[&str; 2]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<bool>> {
+    Ok(_distance::tcrdist_gene_neighbor_matrix(
+        &seqs, threshold, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seq, seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_gene_neighbor_one_to_many(
+    seq: [&str; 2],
+    seqs: Vec<[&str; 2]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<bool>> {
+    Ok(_distance::tcrdist_gene_neighbor_one_to_many(
+        seq, &seqs, threshold, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_gene_neighbor_many_to_many(
+    seqs1: Vec<[&str; 2]>,
+    seqs2: Vec<[&str; 2]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<bool>> {
+    Ok(_distance::tcrdist_gene_neighbor_many_to_many(
+        &seqs1, &seqs2, threshold, ntrim, ctrim, parallel,
     ))
 }
 
@@ -1302,5 +1423,11 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tcrdist_gene_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_many_to_many, m)?)?;
+
+    m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_one_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_many_to_many, m)?)?;
+
     Ok(())
 }
