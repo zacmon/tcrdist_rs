@@ -66,7 +66,7 @@ fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
 #[pyfunction]
 #[pyo3(signature = (seqs, parallel=false))]
 fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
-    Ok(_distance::hamming_matrix(&seqs, parallel))
+    Ok(_distance::str_cmp_matrix(&seqs, parallel, "hamming"))
 }
 
 /// Compute the Hamming distance between one string and many others.
@@ -97,7 +97,9 @@ fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 #[pyfunction]
 #[pyo3(signature = (seq, seqs, parallel=false))]
 fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
-    Ok(_distance::hamming_one_to_many(&seq, &seqs, parallel))
+    Ok(_distance::str_cmp_one_to_many(
+        &seq, &seqs, parallel, "hamming",
+    ))
 }
 
 /// Compute the Hamming distance between many strings and many others.
@@ -128,7 +130,48 @@ fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<V
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, parallel=false))]
 fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
-    Ok(_distance::hamming_many_to_many(&seqs1, &seqs2, parallel))
+    Ok(_distance::str_cmp_many_to_many(
+        &seqs1, &seqs2, parallel, "hamming",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs, threshold, parallel=false))]
+fn hamming_neighbor_matrix(
+    seqs: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_matrix(
+        &seqs, threshold, parallel, "hamming",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seq, seqs, threshold, parallel=false))]
+fn hamming_neighbor_one_to_many(
+    seq: &str,
+    seqs: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<usize>> {
+    Ok(_distance::str_neighbor_one_to_many(
+        seq, &seqs, threshold, parallel, "hamming",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+fn hamming_neighbor_many_to_many(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_many_to_many(
+        &seqs1, &seqs2, threshold, parallel, "hamming",
+    ))
 }
 
 /// Compute the Levenshtein distance between two strings.
@@ -183,7 +226,7 @@ fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
 #[pyfunction]
 #[pyo3(signature = (seqs, parallel=false))]
 fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
-    Ok(_distance::levenshtein_matrix(&seqs, parallel))
+    Ok(_distance::str_cmp_matrix(&seqs, parallel, "levenshtein"))
 }
 
 /// Compute the Levenshtein distance between one string and many others.
@@ -214,7 +257,12 @@ fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 #[pyfunction]
 #[pyo3(signature = (seq, seqs, parallel=false))]
 fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
-    Ok(_distance::levenshtein_one_to_many(&seq, &seqs, parallel))
+    Ok(_distance::str_cmp_one_to_many(
+        &seq,
+        &seqs,
+        parallel,
+        "levenshtein",
+    ))
 }
 
 /// Compute the Levenshtein distance between many strings and many others.
@@ -248,8 +296,61 @@ fn levenshtein_many_to_many(
     seqs2: Vec<&str>,
     parallel: bool,
 ) -> PyResult<Vec<u32>> {
-    Ok(_distance::levenshtein_many_to_many(
-        &seqs1, &seqs2, parallel,
+    Ok(_distance::str_cmp_many_to_many(
+        &seqs1,
+        &seqs2,
+        parallel,
+        "levenshtein",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs, threshold, parallel=false))]
+fn levenshtein_neighbor_matrix(
+    seqs: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_matrix(
+        &seqs,
+        threshold,
+        parallel,
+        "levenshtein",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seq, seqs, threshold, parallel=false))]
+fn levenshtein_neighbor_one_to_many(
+    seq: &str,
+    seqs: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<usize>> {
+    Ok(_distance::str_neighbor_one_to_many(
+        seq,
+        &seqs,
+        threshold,
+        parallel,
+        "levenshtein",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+fn levenshtein_neighbor_many_to_many(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_many_to_many(
+        &seqs1,
+        &seqs2,
+        threshold,
+        parallel,
+        "levenshtein",
     ))
 }
 
@@ -312,7 +413,11 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
 #[pyfunction]
 #[pyo3(signature = (seqs, parallel=false))]
 fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
-    Ok(_distance::levenshtein_exp_matrix(&seqs, parallel))
+    Ok(_distance::str_cmp_matrix(
+        &seqs,
+        parallel,
+        "levenshtein_exp",
+    ))
 }
 
 /// Compute the Levenshtein distance between one string and many others using exponential search.
@@ -345,8 +450,11 @@ fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>>
 #[pyfunction]
 #[pyo3(signature = (seq, seqs, parallel=false))]
 fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
-    Ok(_distance::levenshtein_exp_one_to_many(
-        &seq, &seqs, parallel,
+    Ok(_distance::str_cmp_one_to_many(
+        &seq,
+        &seqs,
+        parallel,
+        "levenshtein_exp",
     ))
 }
 
@@ -383,8 +491,61 @@ fn levenshtein_exp_many_to_many(
     seqs2: Vec<&str>,
     parallel: bool,
 ) -> PyResult<Vec<u32>> {
-    Ok(_distance::levenshtein_exp_many_to_many(
-        &seqs1, &seqs2, parallel,
+    Ok(_distance::str_cmp_many_to_many(
+        &seqs1,
+        &seqs2,
+        parallel,
+        "levenshtein_exp",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs, threshold, parallel=false))]
+fn levenshtein_exp_neighbor_matrix(
+    seqs: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_matrix(
+        &seqs,
+        threshold,
+        parallel,
+        "levenshtein_exp",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seq, seqs, threshold, parallel=false))]
+fn levenshtein_exp_neighbor_one_to_many(
+    seq: &str,
+    seqs: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<usize>> {
+    Ok(_distance::str_neighbor_one_to_many(
+        seq,
+        &seqs,
+        threshold,
+        parallel,
+        "levenshtein_exp",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+fn levenshtein_exp_neighbor_many_to_many(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_many_to_many(
+        &seqs1,
+        &seqs2,
+        threshold,
+        parallel,
+        "levenshtein_exp",
     ))
 }
 
@@ -1307,11 +1468,11 @@ fn tcrdist_gene_many_to_many(
 ///     This parameter must be >= 0.
 /// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
-    ///     This parameter must be >= 0.
+///     This parameter must be >= 0.
 ///
 /// Returns
 /// -------
-/// bool 
+/// bool
 ///     Whether the two CDR3-V gene pairs are have tcrdist within the threshold.
 ///
 /// Examples
@@ -1347,7 +1508,7 @@ fn tcrdist_gene_neighbor_matrix(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> PyResult<Vec<bool>> {
+) -> PyResult<Vec<[usize; 2]>> {
     Ok(_distance::tcrdist_gene_neighbor_matrix(
         &seqs, threshold, ntrim, ctrim, parallel,
     ))
@@ -1363,7 +1524,7 @@ fn tcrdist_gene_neighbor_one_to_many(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> PyResult<Vec<bool>> {
+) -> PyResult<Vec<usize>> {
     Ok(_distance::tcrdist_gene_neighbor_one_to_many(
         seq, &seqs, threshold, ntrim, ctrim, parallel,
     ))
@@ -1379,7 +1540,7 @@ fn tcrdist_gene_neighbor_many_to_many(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> PyResult<Vec<bool>> {
+) -> PyResult<Vec<[usize; 2]>> {
     Ok(_distance::tcrdist_gene_neighbor_many_to_many(
         &seqs1, &seqs2, threshold, ntrim, ctrim, parallel,
     ))
@@ -1393,15 +1554,27 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(hamming_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_many_to_many, m)?)?;
 
+    m.add_function(wrap_pyfunction!(hamming_neighbor_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(hamming_neighbor_one_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(hamming_neighbor_many_to_many, m)?)?;
+
     m.add_function(wrap_pyfunction!(levenshtein_exp, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_many_to_many, m)?)?;
 
+    m.add_function(wrap_pyfunction!(levenshtein_exp_neighbor_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_exp_neighbor_one_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_exp_neighbor_many_to_many, m)?)?;
+
     m.add_function(wrap_pyfunction!(levenshtein, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_many_to_many, m)?)?;
+
+    m.add_function(wrap_pyfunction!(levenshtein_neighbor_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_neighbor_one_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_neighbor_many_to_many, m)?)?;
 
     m.add_function(wrap_pyfunction!(amino_acid_distance, m)?)?;
     m.add_function(wrap_pyfunction!(v_gene_distance, m)?)?;

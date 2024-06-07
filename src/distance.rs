@@ -711,30 +711,29 @@ pub fn tcrdist_gene_neighbor_matrix(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> Vec<bool> {
+) -> Vec<[usize; 2]> {
     if parallel == false {
-        let seqs_len: usize = seqs.len();
-        let num_combinations: usize = seqs_len * (seqs_len - 1) / 2;
-        let mut dists: Vec<bool> = vec![false; num_combinations];
-        let mut counter: usize = 0;
-
-        for (i, &s1) in seqs.iter().enumerate() {
-            for &s2 in seqs[i + 1..].iter() {
-                dists[counter] = tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim);
-                counter += 1;
-            }
-        }
-
-        dists
+        seqs.iter()
+            .enumerate()
+            .flat_map(|(idx, &s1)| {
+                seqs[idx + 1..]
+                    .iter()
+                    .enumerate()
+                    .filter(move |(_, &s2)| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
+                    .map(move |(jdx, _)| [idx, idx + 1 + jdx])
+            })
+            .collect()
     } else {
         POOL.install(|| {
             seqs.par_iter()
                 .enumerate()
-                .flat_map(|(i, &s1)| {
-                    seqs[i + 1..]
+                .flat_map(|(idx, &s1)| {
+                    seqs[idx + 1..]
                         .iter()
-                        .map(|&s2| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
-                        .collect::<Vec<bool>>()
+                        .enumerate()
+                        .filter(|(_, &s2)| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
+                        .map(move |(jdx, _)| [idx, idx + 1 + jdx])
+                        .collect::<Vec<[usize; 2]>>()
                 })
                 .collect()
         })
@@ -748,16 +747,20 @@ pub fn tcrdist_gene_neighbor_one_to_many(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> Vec<bool> {
+) -> Vec<usize> {
     if parallel == false {
         seqs.iter()
-            .map(|&s| tcrdist_gene_neighbor(seq, s, threshold, ntrim, ctrim))
+            .enumerate()
+            .filter(|(_, &s)| tcrdist_gene_neighbor(seq, s, threshold, ntrim, ctrim))
+            .map(|(idx, _)| idx)
             .collect()
     } else {
         POOL.install(|| {
             seqs.par_iter()
-                .map(|&s| tcrdist_gene_neighbor(seq, s, threshold, ntrim, ctrim))
-                .collect::<Vec<bool>>()
+                .enumerate()
+                .filter(|(_, &s)| tcrdist_gene_neighbor(seq, s, threshold, ntrim, ctrim))
+                .map(|(idx, _)| idx)
+                .collect::<Vec<usize>>()
         })
     }
 }
@@ -769,37 +772,50 @@ pub fn tcrdist_gene_neighbor_many_to_many(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> Vec<bool> {
+) -> Vec<[usize; 2]> {
     if parallel == false {
-        let seqs1_len: usize = seqs1.len();
-        let seqs2_len: usize = seqs2.len();
-        let mut dists: Vec<bool> = vec![false; seqs1_len * seqs2_len];
-        let mut counter: usize = 0;
-
-        for &s1 in seqs1.iter() {
-            for &s2 in seqs2.iter() {
-                dists[counter] = tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim);
-                counter += 1;
-            }
-        }
-        dists
+        seqs1
+            .iter()
+            .enumerate()
+            .flat_map(|(idx, &s1)| {
+                seqs2
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, &s2)| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
+                    .map(|(jdx, _)| [idx, jdx])
+                    .collect::<Vec<[usize; 2]>>()
+            })
+            .collect()
     } else {
         POOL.install(|| {
             seqs1
                 .par_iter()
-                .flat_map(|&s1| {
+                .enumerate()
+                .flat_map(|(idx, &s1)| {
                     seqs2
                         .iter()
-                        .map(|&s2| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
-                        .collect::<Vec<bool>>()
+                        .enumerate()
+                        .filter(|(_, &s2)| tcrdist_gene_neighbor(s1, s2, threshold, ntrim, ctrim))
+                        .map(|(jdx, _)| [idx, jdx])
+                        .collect::<Vec<[usize; 2]>>()
                 })
                 .collect()
         })
     }
 }
 
-/// Compute the Hamming distance matrix on an iterable of strings.
-pub fn hamming_matrix(seqs: &[&str], parallel: bool) -> Vec<u32> {
+pub fn map_metric(metric_name: &str) -> fn(&[u8], &[u8]) -> u32 {
+    let metric: Result<fn(&[u8], &[u8]) -> u32, &'static str> = match metric_name {
+        "hamming" => Ok(hamming),
+        "levenshtein" => Ok(levenshtein),
+        "levenshtein_exp" => Ok(levenshtein_exp),
+        _ => Err("The given metric is not an acceptable option. Try hamming, levenshtein, or levenshtein_exp.")
+    };
+    metric.unwrap()
+}
+
+pub fn str_cmp_matrix(seqs: &[&str], parallel: bool, metric: &str) -> Vec<u32> {
+    let metric_fn = map_metric(metric);
     if parallel == false {
         let seqs_len: usize = seqs.len();
         let num_combinations: usize = seqs_len * (seqs_len - 1) / 2;
@@ -808,7 +824,7 @@ pub fn hamming_matrix(seqs: &[&str], parallel: bool) -> Vec<u32> {
 
         for (i, &s1) in seqs.iter().enumerate() {
             for &s2 in seqs[i + 1..].iter() {
-                dists[counter] = hamming(s1.as_bytes(), s2.as_bytes());
+                dists[counter] = metric_fn(s1.as_bytes(), s2.as_bytes());
                 counter += 1;
             }
         }
@@ -821,7 +837,7 @@ pub fn hamming_matrix(seqs: &[&str], parallel: bool) -> Vec<u32> {
                 .flat_map(|(i, &s1)| {
                     seqs[i + 1..]
                         .iter()
-                        .map(|&s2| hamming(s1.as_bytes(), s2.as_bytes()))
+                        .map(|&s2| metric_fn(s1.as_bytes(), s2.as_bytes()))
                         .collect::<Vec<u32>>()
                 })
                 .collect()
@@ -829,31 +845,36 @@ pub fn hamming_matrix(seqs: &[&str], parallel: bool) -> Vec<u32> {
     }
 }
 
-/// Compute the Hamming distance between one string and many different strings.
-pub fn hamming_one_to_many(seq: &str, seqs: &[&str], parallel: bool) -> Vec<u32> {
+pub fn str_cmp_one_to_many(seq: &str, seqs: &[&str], parallel: bool, metric: &str) -> Vec<u32> {
+    let metric_fn = map_metric(metric);
     let seq_bytes: &[u8] = seq.as_bytes();
     if parallel == false {
         seqs.iter()
-            .map(|&s| hamming(seq_bytes, s.as_bytes()))
+            .map(|&s| metric_fn(seq_bytes, s.as_bytes()))
             .collect()
     } else {
         POOL.install(|| {
             seqs.par_iter()
-                .map(|&s| hamming(seq_bytes, s.as_bytes()))
+                .map(|&s| metric_fn(seq_bytes, s.as_bytes()))
                 .collect::<Vec<u32>>()
         })
     }
 }
 
-/// Compute the Hamming distance between many strings and many others.
-pub fn hamming_many_to_many(seqs1: &[&str], seqs2: &[&str], parallel: bool) -> Vec<u32> {
+pub fn str_cmp_many_to_many(
+    seqs1: &[&str],
+    seqs2: &[&str],
+    parallel: bool,
+    metric: &str,
+) -> Vec<u32> {
+    let metric_fn = map_metric(metric);
     if parallel == false {
         let mut dists: Vec<u32> = vec![0; seqs1.len() * seqs2.len()];
         let mut counter: usize = 0;
 
         for &s1 in seqs1.iter() {
             for &s2 in seqs2.iter() {
-                dists[counter] = hamming(s1.as_bytes(), s2.as_bytes());
+                dists[counter] = metric_fn(s1.as_bytes(), s2.as_bytes());
                 counter += 1;
             }
         }
@@ -866,7 +887,7 @@ pub fn hamming_many_to_many(seqs1: &[&str], seqs2: &[&str], parallel: bool) -> V
                 .flat_map(|&s1| {
                     seqs2
                         .iter()
-                        .map(|&s2| hamming(s1.as_bytes(), s2.as_bytes()))
+                        .map(|&s2| metric_fn(s1.as_bytes(), s2.as_bytes()))
                         .collect::<Vec<u32>>()
                 })
                 .collect()
@@ -874,154 +895,102 @@ pub fn hamming_many_to_many(seqs1: &[&str], seqs2: &[&str], parallel: bool) -> V
     }
 }
 
-/// Compute the Levenshtein distance matrix on an iterable of strings using exponential search.
-pub fn levenshtein_exp_matrix(seqs: &[&str], parallel: bool) -> Vec<u32> {
+pub fn str_neighbor_matrix(
+    seqs: &[&str],
+    threshold: u32,
+    parallel: bool,
+    metric: &str,
+) -> Vec<[usize; 2]> {
+    let metric_fn = map_metric(metric);
     if parallel == false {
-        let seqs_len: usize = seqs.len();
-        let num_combinations: usize = seqs_len * (seqs_len - 1) / 2;
-        let mut dists: Vec<u32> = vec![0; num_combinations];
-        let mut counter: usize = 0;
-
-        for (i, &s1) in seqs.iter().enumerate() {
-            for &s2 in seqs[i + 1..].iter() {
-                dists[counter] = levenshtein_exp(s1.as_bytes(), s2.as_bytes());
-                counter += 1;
-            }
-        }
-
-        dists
+        seqs.iter()
+            .enumerate()
+            .flat_map(|(idx, &s1)| {
+                seqs[idx + 1..]
+                    .iter()
+                    .enumerate()
+                    .filter(move |(_, &s2)| metric_fn(s1.as_bytes(), s2.as_bytes()) <= threshold)
+                    .map(move |(jdx, _)| [idx, idx + 1 + jdx])
+            })
+            .collect()
     } else {
         POOL.install(|| {
             seqs.par_iter()
                 .enumerate()
-                .flat_map(|(i, &s1)| {
-                    seqs[i + 1..]
+                .flat_map(|(idx, &s1)| {
+                    seqs[idx + 1..]
                         .iter()
-                        .map(|&s2| levenshtein_exp(s1.as_bytes(), s2.as_bytes()))
-                        .collect::<Vec<u32>>()
+                        .enumerate()
+                        .filter(move |(_, &s2)| {
+                            metric_fn(s1.as_bytes(), s2.as_bytes()) <= threshold
+                        })
+                        .map(move |(jdx, _)| [idx, idx + 1 + jdx])
+                        .collect::<Vec<[usize; 2]>>()
                 })
                 .collect()
         })
     }
 }
 
-/// Compute the Levenshtein distance with exponential search between one string and
-/// many others.
-pub fn levenshtein_exp_one_to_many(seq: &str, seqs: &[&str], parallel: bool) -> Vec<u32> {
-    let seq_bytes: &[u8] = seq.as_bytes();
+pub fn str_neighbor_one_to_many(
+    seq: &str,
+    seqs: &[&str],
+    threshold: u32,
+    parallel: bool,
+    metric: &str,
+) -> Vec<usize> {
+    let metric_fn = map_metric(metric);
+    let seq_bytes = seq.as_bytes();
     if parallel == false {
         seqs.iter()
-            .map(|&s| levenshtein_exp(seq_bytes, s.as_bytes()))
+            .enumerate()
+            .filter(|(_, &s)| metric_fn(seq_bytes, s.as_bytes()) <= threshold)
+            .map(|(idx, _)| idx)
             .collect()
-    } else {
-        POOL.install(|| {
-            seqs.par_iter()
-                .map(|&s| levenshtein_exp(seq_bytes, s.as_bytes()))
-                .collect::<Vec<u32>>()
-        })
-    }
-}
-
-/// Compute the Levenshtein distance with exponential search between many strings and
-/// many others.
-pub fn levenshtein_exp_many_to_many(seqs1: &[&str], seqs2: &[&str], parallel: bool) -> Vec<u32> {
-    if parallel == false {
-        let mut dists: Vec<u32> = vec![0; seqs1.len() * seqs2.len()];
-        let mut counter: usize = 0;
-
-        for &s1 in seqs1.iter() {
-            for &s2 in seqs2.iter() {
-                dists[counter] = levenshtein_exp(s1.as_bytes(), s2.as_bytes());
-                counter += 1;
-            }
-        }
-
-        dists
-    } else {
-        POOL.install(|| {
-            seqs1
-                .par_iter()
-                .flat_map(|&s1| {
-                    seqs2
-                        .iter()
-                        .map(|&s2| levenshtein_exp(s1.as_bytes(), s2.as_bytes()))
-                        .collect::<Vec<u32>>()
-                })
-                .collect()
-        })
-    }
-}
-
-/// Compute the Levenshtein distance matrix on an iterable of strings.
-pub fn levenshtein_matrix(seqs: &[&str], parallel: bool) -> Vec<u32> {
-    if parallel == false {
-        let seqs_len: usize = seqs.len();
-        let num_combinations: usize = seqs_len * (seqs_len - 1) / 2;
-        let mut dists: Vec<u32> = vec![0; num_combinations];
-        let mut counter: usize = 0;
-
-        for (i, &s1) in seqs.iter().enumerate() {
-            for &s2 in seqs[i + 1..].iter() {
-                dists[counter] = levenshtein(s1.as_bytes(), s2.as_bytes());
-                counter += 1;
-            }
-        }
-
-        dists
     } else {
         POOL.install(|| {
             seqs.par_iter()
                 .enumerate()
-                .flat_map(|(i, &s1)| {
-                    seqs[i + 1..]
-                        .iter()
-                        .map(|&s2| levenshtein(s1.as_bytes(), s2.as_bytes()))
-                        .collect::<Vec<u32>>()
-                })
-                .collect()
+                .filter(|(_, &s)| metric_fn(seq_bytes, s.as_bytes()) <= threshold)
+                .map(|(idx, _)| idx)
+                .collect::<Vec<usize>>()
         })
     }
 }
 
-/// Compute the Levenshtein distance between one string and many others.
-pub fn levenshtein_one_to_many(seq: &str, seqs: &[&str], parallel: bool) -> Vec<u32> {
-    let seq_bytes: &[u8] = seq.as_bytes();
+pub fn str_neighbor_many_to_many(
+    seqs1: &[&str],
+    seqs2: &[&str],
+    threshold: u32,
+    parallel: bool,
+    metric: &str,
+) -> Vec<[usize; 2]> {
+    let metric_fn = map_metric(metric);
     if parallel == false {
-        seqs.iter()
-            .map(|&s| levenshtein(seq_bytes, s.as_bytes()))
+        seqs1
+            .iter()
+            .enumerate()
+            .flat_map(|(idx, &s1)| {
+                seqs2
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, &s2)| metric_fn(s1.as_bytes(), s2.as_bytes()) <= threshold)
+                    .map(|(jdx, _)| [idx, jdx])
+                    .collect::<Vec<[usize; 2]>>()
+            })
             .collect()
-    } else {
-        POOL.install(|| {
-            seqs.par_iter()
-                .map(|&s| levenshtein(seq_bytes, s.as_bytes()))
-                .collect::<Vec<u32>>()
-        })
-    }
-}
-
-/// Compute the Levenshtein distance between many strings and many others.
-pub fn levenshtein_many_to_many(seqs1: &[&str], seqs2: &[&str], parallel: bool) -> Vec<u32> {
-    if parallel == false {
-        let mut dists: Vec<u32> = vec![0; seqs1.len() * seqs2.len()];
-        let mut counter: usize = 0;
-
-        for &s1 in seqs1.iter() {
-            for &s2 in seqs2.iter() {
-                dists[counter] = levenshtein(s1.as_bytes(), s2.as_bytes());
-                counter += 1;
-            }
-        }
-
-        dists
     } else {
         POOL.install(|| {
             seqs1
                 .par_iter()
-                .flat_map(|&s1| {
+                .enumerate()
+                .flat_map(|(idx, &s1)| {
                     seqs2
                         .iter()
-                        .map(|&s2| levenshtein(s1.as_bytes(), s2.as_bytes()))
-                        .collect::<Vec<u32>>()
+                        .enumerate()
+                        .filter(|(_, &s2)| metric_fn(s1.as_bytes(), s2.as_bytes()) <= threshold)
+                        .map(|(jdx, _)| [idx, jdx])
+                        .collect::<Vec<[usize; 2]>>()
                 })
                 .collect()
         })
