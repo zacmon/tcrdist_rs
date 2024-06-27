@@ -174,6 +174,19 @@ fn hamming_neighbor_many_to_many(
     ))
 }
 
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+fn hamming_bin_many_to_many(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    parallel: bool,
+) -> PyResult<Vec<u32>> {
+    Ok(_distance::str_bin_many_to_many(
+        &seqs1, &seqs2, parallel, "hamming",
+    ))
+}
+
 /// Compute the Levenshtein distance between two strings.
 ///
 /// The strings must be representable as byte strings.
@@ -349,6 +362,22 @@ fn levenshtein_neighbor_many_to_many(
         &seqs1,
         &seqs2,
         threshold,
+        parallel,
+        "levenshtein",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+fn levenshtein_bin_many_to_many(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    parallel: bool,
+) -> PyResult<Vec<u32>> {
+    Ok(_distance::str_bin_many_to_many(
+        &seqs1,
+        &seqs2,
         parallel,
         "levenshtein",
     ))
@@ -544,6 +573,22 @@ fn levenshtein_exp_neighbor_many_to_many(
         &seqs1,
         &seqs2,
         threshold,
+        parallel,
+        "levenshtein_exp",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+fn levenshtein_exp_bin_many_to_many(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    parallel: bool,
+) -> PyResult<Vec<u32>> {
+    Ok(_distance::str_bin_many_to_many(
+        &seqs1,
+        &seqs2,
         parallel,
         "levenshtein_exp",
     ))
@@ -1575,6 +1620,10 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(levenshtein_neighbor_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_neighbor_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_neighbor_many_to_many, m)?)?;
+
+    m.add_function(wrap_pyfunction!(hamming_bin_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_exp_bin_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_bin_many_to_many, m)?)?;
 
     m.add_function(wrap_pyfunction!(amino_acid_distance, m)?)?;
     m.add_function(wrap_pyfunction!(v_gene_distance, m)?)?;

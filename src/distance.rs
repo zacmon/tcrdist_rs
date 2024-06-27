@@ -3,6 +3,7 @@ use crate::match_table;
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use std::cmp;
+use std::collections::HashMap;
 use triple_accel::*;
 
 pub static POOL: Lazy<rayon::ThreadPool> = Lazy::new(|| {
@@ -994,5 +995,69 @@ pub fn str_neighbor_many_to_many(
                 })
                 .collect()
         })
+    }
+}
+
+pub fn str_bin_many_to_many(
+    seqs1: &[&str],
+    seqs2: &[&str],
+    parallel: bool,
+    metric: &str,
+) -> Vec<u32> {
+    let metric_fn = map_metric(metric);
+    if parallel == false {
+        let counter = seqs1.iter().fold(HashMap::new(), |mut acc, &s1| {
+            seqs2.iter().for_each(|&s2| {
+                *acc.entry(metric_fn(s1.as_bytes(), s2.as_bytes()))
+                    .or_insert(0) += 1;
+            });
+            acc
+        });
+        let max_distance: usize = *counter
+            .iter()
+            .max_by(|a, b| a.0.cmp(&b.0))
+            .map(|(k, _v)| k)
+            .unwrap() as usize;
+
+        let mut bincount = vec![0; max_distance + 1];
+        for (key, value) in counter.iter() {
+            bincount[*key as usize] = *value;
+        }
+        bincount
+    } else {
+        let counter = POOL.install(|| {
+            seqs1
+                .par_iter()
+                .fold(
+                    || HashMap::new(),
+                    |mut acc, &s1| {
+                        for s2 in seqs2.iter() {
+                            *acc.entry(metric_fn(s1.as_bytes(), s2.as_bytes()))
+                                .or_insert(0) += 1;
+                        }
+                        acc
+                    },
+                )
+                .reduce(
+                    || HashMap::new(),
+                    |m1, m2| {
+                        m2.iter().fold(m1, |mut acc, (k, vs)| {
+                            *acc.entry(k.clone()).or_insert(0) += vs;
+                            acc
+                        })
+                    },
+                )
+        });
+        let max_distance: usize = *counter
+            .iter()
+            .max_by(|a, b| a.0.cmp(&b.0))
+            .map(|(k, _v)| k)
+            .unwrap() as usize;
+
+        let mut bincount = vec![0; max_distance + 1];
+        for (key, value) in counter.iter() {
+            bincount[*key as usize] = *value;
+        }
+        bincount
     }
 }
