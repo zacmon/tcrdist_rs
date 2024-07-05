@@ -137,12 +137,21 @@ fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> P
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+fn hamming_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
+    Ok(_distance::str_cmp_pairwise(
+        &seqs1, &seqs2, parallel, "hamming",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
 #[pyo3(signature = (seqs, threshold, parallel=false))]
 fn hamming_neighbor_matrix(
     seqs: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::str_neighbor_matrix(
         &seqs, threshold, parallel, "hamming",
     ))
@@ -155,11 +164,12 @@ fn hamming_neighbor_one_to_many(
     seqs: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<usize>> {
+) -> PyResult<Vec<[usize; 2]>> {
     Ok(_distance::str_neighbor_one_to_many(
         seq, &seqs, threshold, parallel, "hamming",
     ))
 }
+
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
@@ -168,8 +178,22 @@ fn hamming_neighbor_many_to_many(
     seqs2: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::str_neighbor_many_to_many(
+        &seqs1, &seqs2, threshold, parallel, "hamming",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+fn hamming_neighbor_pairwise(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_pairwise(
         &seqs1, &seqs2, threshold, parallel, "hamming",
     ))
 }
@@ -319,12 +343,23 @@ fn levenshtein_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+fn levenshtein_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
+    Ok(_distance::str_cmp_pairwise(
+        &seqs1,
+        &seqs2,
+        parallel,
+        "levenshtein",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
 #[pyo3(signature = (seqs, threshold, parallel=false))]
 fn levenshtein_neighbor_matrix(
     seqs: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::str_neighbor_matrix(
         &seqs,
         threshold,
@@ -340,7 +375,7 @@ fn levenshtein_neighbor_one_to_many(
     seqs: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<usize>> {
+) -> PyResult<Vec<[usize; 2]>> {
     Ok(_distance::str_neighbor_one_to_many(
         seq,
         &seqs,
@@ -357,7 +392,7 @@ fn levenshtein_neighbor_many_to_many(
     seqs2: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::str_neighbor_many_to_many(
         &seqs1,
         &seqs2,
@@ -367,6 +402,23 @@ fn levenshtein_neighbor_many_to_many(
     ))
 }
 
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+fn levenshtein_neighbor_pairwise(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_pairwise(
+        &seqs1,
+        &seqs2,
+        threshold,
+        parallel,
+        "levenshtein",
+    ))
+}
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, parallel=false))]
@@ -530,12 +582,27 @@ fn levenshtein_exp_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+fn levenshtein_exp_pairwise(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    parallel: bool,
+) -> PyResult<Vec<u32>> {
+    Ok(_distance::str_cmp_pairwise(
+        &seqs1,
+        &seqs2,
+        parallel,
+        "levenshtein_exp",
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
 #[pyo3(signature = (seqs, threshold, parallel=false))]
 fn levenshtein_exp_neighbor_matrix(
     seqs: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::str_neighbor_matrix(
         &seqs,
         threshold,
@@ -551,7 +618,7 @@ fn levenshtein_exp_neighbor_one_to_many(
     seqs: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<usize>> {
+) -> PyResult<Vec<[usize; 2]>> {
     Ok(_distance::str_neighbor_one_to_many(
         seq,
         &seqs,
@@ -568,8 +635,26 @@ fn levenshtein_exp_neighbor_many_to_many(
     seqs2: Vec<&str>,
     threshold: u32,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::str_neighbor_many_to_many(
+        &seqs1,
+        &seqs2,
+        threshold,
+        parallel,
+        "levenshtein_exp",
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+fn levenshtein_exp_neighbor_pairwise(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u32,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::str_neighbor_pairwise(
         &seqs1,
         &seqs2,
         threshold,
@@ -1001,6 +1086,30 @@ fn tcrdist_many_to_many(
     ))
 }
 
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+fn tcrdist_pairwise(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> PyResult<Vec<u16>> {
+    Ok(_distance::tcrdist_pairwise(
+        &seqs1,
+        &seqs2,
+        dist_weight,
+        gap_penalty,
+        ntrim,
+        ctrim,
+        fixed_gappos,
+        parallel,
+    ))
+}
 /// Compute the tcrdist between two CDR3-V allele pairs.
 ///
 /// This incorporates differences between the pMHC, CDR1, CDR2, and CDR3.
@@ -1325,6 +1434,37 @@ fn tcrdist_allele_many_to_many(
     ))
 }
 
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+fn tcrdist_allele_pairwise(
+    seqs1: Vec<[&str; 2]>,
+    seqs2: Vec<[&str; 2]>,
+    phmc_weight: u16,
+    cdr1_weight: u16,
+    cdr2_weight: u16,
+    cdr3_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> PyResult<Vec<u16>> {
+    Ok(_distance::tcrdist_allele_pairwise(
+        &seqs1,
+        &seqs2,
+        phmc_weight,
+        cdr1_weight,
+        cdr2_weight,
+        cdr3_weight,
+        gap_penalty,
+        ntrim,
+        ctrim,
+        fixed_gappos,
+        parallel,
+    ))
+}
+
 /// Compute the tcrdist between two CDR3-V gene pairs.
 ///
 /// Parameters
@@ -1493,6 +1633,20 @@ fn tcrdist_gene_many_to_many(
     ))
 }
 
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_gene_pairwise(
+    seqs1: Vec<[&str; 2]>,
+    seqs2: Vec<[&str; 2]>,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<u16>> {
+    Ok(_distance::tcrdist_gene_pairwise(
+        &seqs1, &seqs2, ntrim, ctrim, parallel,
+    ))
+}
 /// Compute whether two CDR3-V gene pairs are neighbors with tcrdist_gene.
 ///
 /// This function is quicker than using the tcrdist_gene function since it computes
@@ -1553,7 +1707,7 @@ fn tcrdist_gene_neighbor_matrix(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::tcrdist_gene_neighbor_matrix(
         &seqs, threshold, ntrim, ctrim, parallel,
     ))
@@ -1569,7 +1723,7 @@ fn tcrdist_gene_neighbor_one_to_many(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> PyResult<Vec<usize>> {
+) -> PyResult<Vec<[usize; 2]>> {
     Ok(_distance::tcrdist_gene_neighbor_one_to_many(
         seq, &seqs, threshold, ntrim, ctrim, parallel,
     ))
@@ -1585,8 +1739,24 @@ fn tcrdist_gene_neighbor_many_to_many(
     ntrim: usize,
     ctrim: usize,
     parallel: bool,
-) -> PyResult<Vec<[usize; 2]>> {
+) -> PyResult<Vec<[usize; 3]>> {
     Ok(_distance::tcrdist_gene_neighbor_many_to_many(
+        &seqs1, &seqs2, threshold, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_gene_neighbor_pairwise(
+    seqs1: Vec<[&str; 2]>,
+    seqs2: Vec<[&str; 2]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::tcrdist_gene_neighbor_pairwise(
         &seqs1, &seqs2, threshold, ntrim, ctrim, parallel,
     ))
 }
@@ -1598,28 +1768,34 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(hamming_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(hamming_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(hamming_neighbor_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_neighbor_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_neighbor_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(hamming_neighbor_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(levenshtein_exp, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_exp_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(levenshtein_exp_neighbor_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_neighbor_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_neighbor_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_exp_neighbor_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(levenshtein, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(levenshtein_neighbor_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_neighbor_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_neighbor_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(levenshtein_neighbor_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(hamming_bin_many_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(levenshtein_exp_bin_many_to_many, m)?)?;
@@ -1635,21 +1811,25 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tcrdist_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(tcrdist_allele, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_allele_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_allele_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_allele_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_allele_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(tcrdist_gene, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_gene_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_pairwise, m)?)?;
 
     Ok(())
 }
