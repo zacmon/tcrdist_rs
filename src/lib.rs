@@ -13,6 +13,22 @@ pub use match_table::{
     amino_distances, cdr1_distances, cdr2_distances, gene_distance, phmc_distances,
 };
 
+/// Return the current version of the package.
+///
+/// Parameters
+/// ----------
+/// None
+///
+/// Returns
+/// -------
+/// str
+///     CARGO_PKG_VERSION
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+fn version() -> String {
+    format!("{}", env!("CARGO_PKG_VERSION"))
+}
+
 /// Compute the Hamming distance between two strings.
 ///
 /// The strings being compared must have equal lengths or the program will terminate.
@@ -41,7 +57,7 @@ fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
     Ok(triple_accel::hamming(&s1.as_bytes(), &s2.as_bytes()))
 }
 
-/// Compute the Hamming distance matrix on an iterable of strings.
+/// Compute the Hamming distance matrix on an sequence of strings.
 ///
 /// This returns the upper right triangle of the distance matrix.
 /// The strings being compared must have equal lengths or the program will terminate.
@@ -49,14 +65,18 @@ fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
 ///
 /// Parameters
 /// ----------
-/// seqs : iterable of str
+/// seqs : sequence of str
 ///     The strings to be compared. They must all be the same length and have
 ///     an appropriate representation in bytes.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
 /// -------
 /// list of int
 ///     The Hamming distances among the strings.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
 ///
 /// Examples
 /// --------
@@ -78,7 +98,7 @@ fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// ----------
 /// seq : str
 ///     The string against which all others will be compared.
-/// seqs : iterable of str
+/// seqs : sequence of str
 ///     The other strings being compared.
 /// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
@@ -109,10 +129,10 @@ fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<V
 ///
 /// Parameters
 /// ----------
-/// seqs1 : iterable of str
-///     The first iterable of strings.
-/// seqs2 : iterable of str
-///     The other iterable of strings.
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs2 : sequence of str
+///     The other sequence of strings.
 /// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
@@ -135,6 +155,32 @@ fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> P
     ))
 }
 
+/// Compute the Hamming distance between two sequences of strings elementwise.
+///
+/// The strings being compared must have equal lengths or the program will terminate.
+/// Moreover, the strings must be representable as byte strings.
+/// If the sequences of strings differ in length, the sequence with the least items
+/// dictates how many comparisons are performed.
+///
+/// Parameters
+/// ----------
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs2 : sequence of str
+///     The other sequence of strings.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
+///
+/// Returns
+/// -------
+/// list of int
+///     The Hamming distances from the elementwise comparisons.
+///
+/// Examples
+/// --------
+/// >>> seqs1 = ["abb", "abc"]
+/// >>> seqs2 = ["abc", "abd", "fcd"]
+/// >>> assert(hamming_pairwise(seqs1, seqs2, parallel=False) == [1, 1])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, parallel=false))]
@@ -144,6 +190,33 @@ fn hamming_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyRes
     ))
 }
 
+/// Obtain the Hamming neighbors from a sequence of strings, ignoring self-neighbors.
+///
+/// The strings being compared must have equal lengths or the program will terminate.
+/// Moreover, the strings must be representable as byte strings.
+/// This function is preferable to computing the entire matrix and then identifying neighbors for
+/// both speed and memory.
+///
+/// Parameters
+/// ----------
+/// seqs : sequence of str
+///     The strings to be compared. They must all be the same length and have
+///     an appropriate representation in bytes.
+/// threshold : int
+///     The largest Hamming distance used to consider a pair of strings neighbors.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
+///
+/// Returns
+/// -------
+/// list of list of int
+///     The 0th and 1st values of the sublist are the indices of the neighbors and the 2nd value is
+///     the Hamming distance between the pair.
+///
+/// Examples
+/// --------
+/// >>> seqs = ["abc", "abd", "fcd", "abb"]
+/// >>> assert(hamming_neighbor_matrix(seqs, 1, parallel=False) == [[0, 1, 1], [0, 3, 1], [1, 3, 1]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs, threshold, parallel=false))]
@@ -156,6 +229,34 @@ fn hamming_neighbor_matrix(
         &seqs, threshold, parallel, "hamming",
     ))
 }
+
+/// Compute the Hamming neighbors between one string and many others.
+///
+/// The strings being compared must have equal lengths or the program will terminate.
+/// Moreover, the strings must be representable as byte strings.
+///
+/// Parameters
+/// ----------
+/// seq : str
+///     The string against which all others will be compared.
+/// seqs : sequence of str
+///     The other strings being compared.
+/// threshold : int
+///     The largest Hamming distance used to consider a pair of strings neighbors.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
+///
+/// Returns
+/// -------
+/// list of list of int
+///     The 0th value of the sublist gives the index of in seqs that is a neighbor of seq. The 1st
+///     value is the Hamming distance between the pair.
+///
+/// Examples
+/// --------
+/// >>> seq = "abb"
+/// >>> seqs = ["abc", "fcd", "abb"]
+/// >>> assert(hamming_neighbor_one_to_many(seq, seqs, 1, parallel=False) == [[0, 1], [2, 0]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seq, seqs, threshold, parallel=false))]
@@ -170,6 +271,35 @@ fn hamming_neighbor_one_to_many(
     ))
 }
 
+/// Obtain the Hamming neighbors between a sequence of strings and another sequence of strings.
+///
+/// The strings being compared must have equal lengths or the program will terminate.
+/// Moreover, the strings must be representable as byte strings.
+/// This function is preferable to computing the entire distance matrix and then identifying neighbors for
+/// both speed and memory.
+///
+/// Parameters
+/// ----------
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs2 : sequence of str
+///     The other sequence of strings.
+/// threshold : int
+///     The largest Hamming distance used to consider a pair of strings neighbors.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
+///
+/// Returns
+/// -------
+/// list of list of int
+///     The 0th and 1st values of the sublist are the indices of the neighbors in their respective
+///     sequences and the 2nd value is the Hamming distance between the pair.
+///
+/// Examples
+/// --------
+/// >>> seqs1 = ["bbi", "abd", "tih", "fcd", "abb"]
+/// >>> seqs2 = ["bbb", "tjh"]
+/// >>> assert(hamming_neighbor_many_to_many(seqs1, seqs2, 1, parallel=False) == [[0, 0, 1], [2, 1, 1], [4, 0, 1]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
@@ -184,6 +314,39 @@ fn hamming_neighbor_many_to_many(
     ))
 }
 
+/// Obtain the Hamming neighbors between a sequence of strings and another sequence of strings
+/// elementwise.
+///
+/// The strings being compared must have equal lengths or the program will terminate.
+/// Moreover, the strings must be representable as byte strings.
+/// This function is preferable to computing the entire distance matrix and then identifying neighbors for
+/// both speed and memory.
+/// If the sequences of strings differ in length, the sequence with the least items
+/// dictates how many comparisons are performed.
+///
+/// Parameters
+/// ----------
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs2 : sequence of str
+///     The other sequence of strings.
+/// threshold : int
+///     The largest Hamming distance used to consider a pair of strings neighbors.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
+///
+/// Returns
+/// -------
+/// list of list of int
+///     The 0th value of the sublist gives the index of the neighbors (only one index is needed
+///     since they are compared elementwise) and the 1st value of the sublist is the Hamming
+///     distance between the pair.
+///
+/// Examples
+/// --------
+/// >>> seqs1 = ["bbi", "abd", "tih", "fcd", "abb"]
+/// >>> seqs2 = ["bbb", "tjh"]
+/// >>> assert(hamming_neighbor_pairwise(seqs1, seqs2, 1, parallel=False) == [[0, 1]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
@@ -198,6 +361,34 @@ fn hamming_neighbor_pairwise(
     ))
 }
 
+/// Compute the Hamming distance between many strings and many other strings, counting the number
+/// of occurrences of each distance.
+///
+/// The strings being compared must have equal lengths or the program will terminate.
+/// Moreover, the strings must be representable as byte strings.
+/// This method is preferable to returning the full distance vectorform and counting occurrences in
+/// terms of both speed and memory.
+///
+/// Parameters
+/// ----------
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs2 : sequence of str
+///     The other sequence of strings.
+/// parallel: bool, default False
+///     Bool to specify if computation should be parallelized.
+///
+/// Returns
+/// -------
+/// list of int
+///     The number of occurrences of Hamming distances, where the index gives the Hamming distance.
+///
+/// Examples
+/// --------
+/// >>> seqs1 = ['abc', 'cdf', 'aaa', 'tfg']
+/// >>> seqs2 = ['abc', 'cdf', 'ggg', 'uuu', 'otp']
+/// >>> out = tdr.hamming_bin_many_to_many(seqs1, seqs2)
+/// >>> assert out == [2, 0, 2, 16]
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, parallel=false))]
@@ -238,13 +429,13 @@ fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
     Ok(triple_accel::levenshtein(&s1.as_bytes(), &s2.as_bytes()))
 }
 
-/// Compute the Levenshtein distance matrix on an iterable of strings.
+/// Compute the Levenshtein distance matrix on an sequence of strings.
 ///
 /// The strings must be representable as byte strings.
 ///
 /// Parameters
 /// ----------
-/// seqs : iterable str
+/// seqs : sequence str
 ///     The strings to be compared. The must have an appropriate representation
 ///     as byte strings.
 /// parallel: bool, default False
@@ -275,7 +466,7 @@ fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// ----------
 /// seq : str
 ///     The string against which all others will be compared.
-/// seqs : iterable of str
+/// seqs : sequence of str
 ///     The other strings being compared.
 /// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
@@ -308,10 +499,10 @@ fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResu
 ///
 /// Parameters
 /// ----------
-/// seqs1 : iterable of str
-///     The first iterable of strings.
-/// seqs : iterable of str
-///     The second iterable of strings.
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs : sequence of str
+///     The second sequence of strings.
 /// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
@@ -419,6 +610,7 @@ fn levenshtein_neighbor_pairwise(
         "levenshtein",
     ))
 }
+
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 #[pyo3(signature = (seqs1, seqs2, parallel=false))]
@@ -467,7 +659,7 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
     ))
 }
 
-/// Compute the Levenshtein distance matrix on an iterable of strings using exponential search.
+/// Compute the Levenshtein distance matrix on an sequence of strings using exponential search.
 ///
 /// The strings must be representable as byte strings. This uses an exponential
 /// search to estimate the number of edits. It will be more efficient than
@@ -475,7 +667,7 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
 ///
 /// Parameters
 /// ----------
-/// seqs : iterable str
+/// seqs : sequence str
 ///     The strings to be compared. The must have an appropriate representation
 ///     as byte strings.
 /// parallel: bool, default False
@@ -512,7 +704,7 @@ fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>>
 /// ----------
 /// seq : str
 ///     The string against which all others will be compared.
-/// seqs : iterable of str
+/// seqs : sequence of str
 ///     The other strings being compared.
 /// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
@@ -547,10 +739,10 @@ fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> Py
 ///
 /// Parameters
 /// ----------
-/// seqs1 : iterable of str
-///     The first iterable of strings.
-/// seqs : iterable of str
-///     The second iterable of strings.
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs : sequence of str
+///     The second sequence of strings.
 /// parallel: bool, default False
 ///     Bool to specify if computation should be parallelized.
 ///
@@ -681,6 +873,15 @@ fn levenshtein_exp_bin_many_to_many(
 
 /// Compute the distance between two amino acids using BLOSUM62 substitution penalities.
 ///
+///
+/// For valid residue characters,
+///
+///.. math::
+///     d(a, a') = \begin{cases}
+///        0, & a = a' \\
+///        \min(4, 4 - \mathrm{BLOSUM62}(a, a')), & \mathrm{else}
+///    \end{cases}
+///
 /// This function is invariant to case. I.e., lowercase and uppercase residues
 /// can be compared.
 ///
@@ -707,7 +908,7 @@ fn amino_acid_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(amino_distances(&s1.as_bytes()[0], &s2.as_bytes()[0]))
 }
 
-/// Compute the distance between V genes using precomputed tcrdists.
+/// Compute the distance between V genes using precomputed TCRdists.
 ///
 /// Parameters
 /// ----------
@@ -732,9 +933,9 @@ fn v_gene_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(gene_distance(&s1.as_bytes(), &s2.as_bytes()))
 }
 
-/// Compute the pMHC distance between V alleles using precomputed tcrdists.
+/// Compute the pMHC distance between V alleles using precomputed TCRdists.
 ///
-/// tcrdists were precomputed using ntrim = ctrim = 0, dist_weight = 1,
+/// TCRdists were precomputed using ntrim = ctrim = 0, dist_weight = 1,
 /// gap_penalty = 4, and fixed_gappos = True.
 ///
 /// Parameters
@@ -760,9 +961,9 @@ fn phmc_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(phmc_distances(s1.as_bytes(), s2.as_bytes()))
 }
 
-/// Compute the CDR1 distance between V alleles using precomputed tcrdists.
+/// Compute the CDR1 distance between V alleles using precomputed TCRdists.
 ///
-/// tcrdists were precomputed using ntrim = ctrim = 0, dist_weight = 1,
+/// TCRdists were precomputed using ntrim = ctrim = 0, dist_weight = 1,
 /// gap_penalty = 4, and fixed_gappos = True.
 ///
 /// Parameters
@@ -779,18 +980,18 @@ fn phmc_distance(s1: &str, s2: &str) -> PyResult<u16> {
 ///
 /// Examples
 /// --------
-/// s1 = "TRBV2*01"
-/// s2 = "TRBV6-2*01"
-/// assert(cdr1_distance(s1, s2) == 8)
+/// >>> s1 = "TRBV2*01"
+/// >>> s2 = "TRBV6-2*01"
+/// >>> assert(cdr1_distance(s1, s2) == 8)
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
 fn cdr1_distance(s1: &str, s2: &str) -> PyResult<u16> {
     Ok(cdr1_distances(s1.as_bytes(), s2.as_bytes()))
 }
 
-/// Compute the CDR2 distance between V alleles using precomputed tcrdists.
+/// Compute the CDR2 distance between V alleles using precomputed TCRdists.
 ///
-/// tcrdists were precomputed using ntrim = ctrim = 0, dist_weight = 1,
+/// TCRdists were precomputed using ntrim = ctrim = 0, dist_weight = 1,
 /// gap_penalty = 4, and fixed_gappos = True.
 ///
 /// Parameters
@@ -881,13 +1082,13 @@ fn tcrdist(
     ))
 }
 
-/// Compute the tcrdist matrix on an iterable of strings.
+/// Compute the tcrdist matrix on an sequence of strings.
 ///
 /// The strings must be representable as byte strings.
 ///
 /// Parameters
 /// ----------
-/// seqs : iterable of str
+/// seqs : sequence of str
 ///     Iterable of strings.
 /// dist_weight : int, default 1
 ///     A weight applied to the mismatch distances. This weight is not applied
@@ -910,7 +1111,7 @@ fn tcrdist(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the strings.
+///     The TCRdists among the strings.
 ///
 /// Examples
 /// --------
@@ -978,7 +1179,7 @@ fn tcrdist_matrix(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the strings.
+///     The TCRdists among the strings.
 ///
 /// Examples
 /// --------
@@ -1023,10 +1224,10 @@ fn tcrdist_one_to_many(
 ///
 /// Parameters
 /// ----------
-/// seqs1 : iterable of str
-///     The first iterable of strings.
-/// seqs2 : iterable of str
-///     The other iterable of strings.
+/// seqs1 : sequence of str
+///     The first sequence of strings.
+/// seqs2 : sequence of str
+///     The other sequence of strings.
 /// dist_weight : int, default 1
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
@@ -1048,7 +1249,7 @@ fn tcrdist_one_to_many(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the strings.
+///     The TCRdists among the strings.
 ///
 /// Examples
 /// --------
@@ -1116,10 +1317,10 @@ fn tcrdist_pairwise(
 ///
 /// Parameters
 /// ----------
-/// s1 : iterable of str
-///     An iterable of the CDR3 amino acid sequence and V allele.
-/// s2 : iterable of str
-///     An iterable of the CDR3 amino acid sequence and V allele.
+/// s1 : sequence of str
+///     A sequence of the CDR3 amino acid sequence and V allele.
+/// s2 : sequence of str
+///     A sequence of the CDR3 amino acid sequence and V allele.
 /// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
 /// cdr1_weight : int, default 1
@@ -1189,15 +1390,15 @@ fn tcrdist_allele(
     ))
 }
 
-/// Compute the tcrdist matrix on an iterable of CDR3-V allele pairs.
+/// Compute the tcrdist matrix on an sequence of CDR3-V allele pairs.
 ///
 /// This returns the upper right triangle of the distance matrix.
 /// This incorporates differences between the pMHC, CDR1, CDR2, and CDR3.
 ///
 /// Parameters
 /// ----------
-/// seqs : iterable of iterable of str
-///     An iterable containing iterables of CDR3 amino acid sequences and V alleles.
+/// seqs : sequence of sequence of str
+///     A sequence containing sequences of CDR3 amino acid sequences and V alleles.
 /// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
 /// cdr1_weight : int, default 1
@@ -1224,7 +1425,7 @@ fn tcrdist_allele(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the CDR3-V allele pairs.
+///     The TCRdists among the CDR3-V allele pairs.
 ///
 /// Examples
 /// --------
@@ -1274,10 +1475,10 @@ fn tcrdist_allele_matrix(
 ///
 /// Parameters
 /// ----------
-/// s1 : iterable of str
-///     An iterable containing a CDR3 amino acid sequence and V allele.
-/// seqs : iterable of iterable of str
-///     An iterable of iterables containing pairs of CDR3 amino acid sequences and V alleles.
+/// s1 : sequence of str
+///     A sequence containing a CDR3 amino acid sequence and V allele.
+/// seqs : sequence of sequence of str
+///     A sequence of sequences containing pairs of CDR3 amino acid sequences and V alleles.
 /// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
 /// cdr1_weight : int, default 1
@@ -1304,7 +1505,7 @@ fn tcrdist_allele_matrix(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the CDR3-V allele sequences.
+///     The TCRdists among the CDR3-V allele sequences.
 ///
 /// Examples
 /// --------
@@ -1357,10 +1558,10 @@ fn tcrdist_allele_one_to_many(
 ///
 /// Parameters
 /// ----------
-/// seqs1 : iterable of iterable of str
-///     An iterable of iterables containing pairs of CDR3 amino acid sequences and V alleles.
-/// seqs2 : iterable of iterable of str
-///     An iterable of iterables containing pairs of CDR3 amino acid sequences and V alleles.
+/// seqs1 : sequence of sequence of str
+///     A sequence of sequences containing pairs of CDR3 amino acid sequences and V alleles.
+/// seqs2 : sequence of sequence of str
+///     A sequence of sequences containing pairs of CDR3 amino acid sequences and V alleles.
 /// phmc_weight : int, default 1
 ///     How much the difference in pMHCs contributes to the distance.
 /// cdr1_weight : int, default 1
@@ -1387,7 +1588,7 @@ fn tcrdist_allele_one_to_many(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the CDR3-V allele pairs.
+///     The TCRdists among the CDR3-V allele pairs.
 ///
 /// Examples
 /// --------
@@ -1469,10 +1670,10 @@ fn tcrdist_allele_pairwise(
 ///
 /// Parameters
 /// ----------
-/// s1 : iterable of str
-///     An iterable containing a CDR3 amino acid sequence and V gene pair.
-/// s2 : iterable of str
-///     An iterable containing a CDR3 amino acid sequence and V gene pair.
+/// s1 : sequence of str
+///     A sequence containing a CDR3 amino acid sequence and V gene pair.
+/// s2 : sequence of str
+///     A sequence containing a CDR3 amino acid sequence and V gene pair.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
@@ -1500,14 +1701,14 @@ fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyR
     Ok(_distance::tcrdist_gene(s1, s2, ntrim, ctrim))
 }
 
-/// Compute the tcrdist matrix on an iterable of CDR3-V gene pairs.
+/// Compute the tcrdist matrix on an sequence of CDR3-V gene pairs.
 ///
 /// This returns the upper right triangle of the distance matrix.
 ///
 /// Parameters
 /// ----------
-/// seqs : iterable of iterable of str
-///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
+/// seqs : sequence of sequence of str
+///     A sequence containing sequences of CDR3 amino acid sequence and V gene pairs.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
@@ -1547,10 +1748,10 @@ fn tcrdist_gene_matrix(
 ///
 /// Parameters
 /// ----------
-/// seq : iterable of str
-///     An iterable containing a CDR3 amino acid sequence and V allele pair.
-/// seqs : iterable of iterable of str
-///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
+/// seq : sequence of str
+///     A sequence containing a CDR3 amino acid sequence and V allele pair.
+/// seqs : sequence of sequence of str
+///     A sequence containing sequences of CDR3 amino acid sequence and V gene pairs.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
@@ -1563,7 +1764,7 @@ fn tcrdist_gene_matrix(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the CDR3-V gene pairs.
+///     The TCRdists among the CDR3-V gene pairs.
 ///
 /// Examples
 /// --------
@@ -1592,10 +1793,10 @@ fn tcrdist_gene_one_to_many(
 ///
 /// Parameters
 /// ----------
-/// seqs1 : iterable of iterable of str
-///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
-/// seqs2 : iterable of iterable of str
-///     An iterable containing iterables of CDR3 amino acid sequence and V gene pairs.
+/// seqs1 : sequence of sequence of str
+///     A sequence containing sequences of CDR3 amino acid sequence and V gene pairs.
+/// seqs2 : sequence of sequence of str
+///     A sequence containing sequences of CDR3 amino acid sequence and V gene pairs.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
 ///     This parameter must be >= 0.
@@ -1608,7 +1809,7 @@ fn tcrdist_gene_one_to_many(
 /// Returns
 /// -------
 /// list of int
-///     The tcrdists among the CDR3-V gene pairs.
+///     The TCRdists among the CDR3-V gene pairs.
 ///
 /// Examples
 /// --------
@@ -1649,17 +1850,17 @@ fn tcrdist_gene_pairwise(
 }
 /// Compute whether two CDR3-V gene pairs are neighbors with tcrdist_gene.
 ///
-/// This function is quicker than using the tcrdist_gene function since it computes
+/// This function is quicker than using the tcrdist_gene function since it first computes
 /// whether the V genes are within the distance threshold and whether the difference
 /// in lengths won't incur a penalty larger than the distance threshold. With these
 /// two checks, many unnecessary calculations are avoided.
 ///
 /// Parameters
 /// ----------
-/// s1 : iterable of str
-///     An iterable containing a CDR3 amino acid sequence and V gene pair.
-/// s2 : iterable of str
-///     An iterable containing a CDR3 amino acid sequence and V gene pair.
+/// s1 : sequence of str
+///     A sequence containing a CDR3 amino acid sequence and V gene pair.
+/// s2 : sequence of str
+///     A sequence containing a CDR3 amino acid sequence and V gene pair.
 /// threshold: int
 ///     The distance threshold that will be used to call sequences neighbors.
 /// ntrim : int, default 3
@@ -1764,6 +1965,8 @@ fn tcrdist_gene_neighbor_pairwise(
 #[pymodule]
 #[pyo3(name = "tcrdist_rs")]
 pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(version, m)?)?;
+
     m.add_function(wrap_pyfunction!(hamming, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(hamming_one_to_many, m)?)?;

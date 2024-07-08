@@ -23,3 +23,13 @@ repository = "https://github.com/zacmon/tcrdist_rs"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
+
+extra-dependencies = [
+  "sphinx",
+  "sphinx-autodoc-typehints",
+  "sphinx-copybutton",
+  "sphinx-autoapi",
+  "furo",
+  "myst-nb",
+  "pandoc",
+]
