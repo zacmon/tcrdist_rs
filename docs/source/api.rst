@@ -1,4 +1,4 @@
-API Documentation
+``tcrdist_rs``
 =================
 
 .. automodule:: tcrdist_rs 

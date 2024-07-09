@@ -6,14 +6,16 @@ Pip
 
 .. code-block:: bash
 
-  pip install tcrdist-rs 
+   pip install tcrdist-rs 
 
 
 Conda
 =====
 
+There is no Conda installation presently.
+
 .. todo::
-  Publish Conda package
+   Publish Conda package
 
 Developer
 =========
