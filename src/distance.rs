@@ -1397,7 +1397,7 @@ pub fn str_neighbor_many_to_many(
                         .fold(Vec::new(), |mut v, (jdx, &s2)| {
                             let dist: u32 = metric_fn(s1.as_bytes(), s2.as_bytes());
                             if dist <= threshold {
-                                v.push([idx, idx + 1 + jdx, dist as usize]);
+                                v.push([idx, idx + jdx, dist as usize]);
                             }
                             v
                         })
