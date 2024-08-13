@@ -5,13 +5,12 @@ mod distance;
 mod match_table;
 use crate::distance as _distance;
 
+pub use match_table::{amino_distances, cdr1_distances, cdr2_distances, phmc_distances};
 #[cfg(all(feature = "pyo3"))]
 use pyo3::prelude::*;
 use triple_accel;
 
-pub use match_table::{
-    amino_distances, cdr1_distances, cdr2_distances, gene_distance, phmc_distances,
-};
+include!(concat!(env!("OUT_DIR"), "/lookup.rs"));
 
 /// Return the current version of the package.
 ///
@@ -929,8 +928,8 @@ fn amino_acid_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// >>> assert(amino_acid_distance(s1, s2) == 4)
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-fn v_gene_distance(s1: &str, s2: &str) -> PyResult<u16> {
-    Ok(gene_distance(&s1.as_bytes(), &s2.as_bytes()))
+fn v_total_distance(s1: &str, s2: &str) -> PyResult<u16> {
+    Ok(total_distance(&s1.as_bytes(), &s2.as_bytes()))
 }
 
 /// Compute the pMHC distance between V alleles using precomputed TCRdists.
@@ -1848,6 +1847,7 @@ fn tcrdist_gene_pairwise(
         &seqs1, &seqs2, ntrim, ctrim, parallel,
     ))
 }
+
 /// Compute whether two CDR3-V gene pairs are neighbors with tcrdist_gene.
 ///
 /// This function is quicker than using the tcrdist_gene function since it first computes
@@ -1962,6 +1962,135 @@ fn tcrdist_gene_neighbor_pairwise(
     ))
 }
 
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (s1, s2, ntrim=3, ctrim=2))]
+fn tcrdist_paired_gene(s1: [&str; 4], s2: [&str; 4], ntrim: usize, ctrim: usize) -> PyResult<u16> {
+    Ok(_distance::tcrdist_paired_gene(s1, s2, ntrim, ctrim))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_matrix(
+    seqs: Vec<[&str; 4]>,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<u16>> {
+    Ok(_distance::tcrdist_paired_gene_matrix(
+        &seqs, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seq, seqs, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_one_to_many(
+    seq: [&str; 4],
+    seqs: Vec<[&str; 4]>,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<u16>> {
+    Ok(_distance::tcrdist_paired_gene_one_to_many(
+        seq, &seqs, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_many_to_many(
+    seqs1: Vec<[&str; 4]>,
+    seqs2: Vec<[&str; 4]>,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<u16>> {
+    Ok(_distance::tcrdist_paired_gene_many_to_many(
+        &seqs1, &seqs2, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_pairwise(
+    seqs1: Vec<[&str; 4]>,
+    seqs2: Vec<[&str; 4]>,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<u16>> {
+    Ok(_distance::tcrdist_paired_gene_pairwise(
+        &seqs1, &seqs2, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_neighbor_matrix(
+    seqs: Vec<[&str; 4]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 3]>> {
+    Ok(_distance::tcrdist_paired_gene_neighbor_matrix(
+        &seqs, threshold, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seq, seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_neighbor_one_to_many(
+    seq: [&str; 4],
+    seqs: Vec<[&str; 4]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::tcrdist_paired_gene_neighbor_one_to_many(
+        seq, &seqs, threshold, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_neighbor_many_to_many(
+    seqs1: Vec<[&str; 4]>,
+    seqs2: Vec<[&str; 4]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 3]>> {
+    Ok(_distance::tcrdist_paired_gene_neighbor_many_to_many(
+        &seqs1, &seqs2, threshold, ntrim, ctrim, parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+fn tcrdist_paired_gene_neighbor_pairwise(
+    seqs1: Vec<[&str; 4]>,
+    seqs2: Vec<[&str; 4]>,
+    threshold: u16,
+    ntrim: usize,
+    ctrim: usize,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::tcrdist_paired_gene_neighbor_pairwise(
+        &seqs1, &seqs2, threshold, ntrim, ctrim, parallel,
+    ))
+}
+
 #[pymodule]
 #[pyo3(name = "tcrdist_rs")]
 pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
@@ -2005,7 +2134,7 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(levenshtein_bin_many_to_many, m)?)?;
 
     m.add_function(wrap_pyfunction!(amino_acid_distance, m)?)?;
-    m.add_function(wrap_pyfunction!(v_gene_distance, m)?)?;
+    m.add_function(wrap_pyfunction!(v_total_distance, m)?)?;
     m.add_function(wrap_pyfunction!(phmc_distance, m)?)?;
     m.add_function(wrap_pyfunction!(cdr1_distance, m)?)?;
     m.add_function(wrap_pyfunction!(cdr2_distance, m)?)?;
@@ -2033,6 +2162,23 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_many_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_gene_neighbor_pairwise, m)?)?;
+
+    m.add_function(wrap_pyfunction!(tcrdist_paired_gene, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_paired_gene_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_paired_gene_one_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_paired_gene_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_paired_gene_pairwise, m)?)?;
+
+    m.add_function(wrap_pyfunction!(tcrdist_paired_gene_neighbor_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        tcrdist_paired_gene_neighbor_one_to_many,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(
+        tcrdist_paired_gene_neighbor_many_to_many,
+        m
+    )?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_paired_gene_neighbor_pairwise, m)?)?;
 
     Ok(())
 }
