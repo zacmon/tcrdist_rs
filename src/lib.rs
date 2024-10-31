@@ -67,15 +67,13 @@ fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
 /// seqs : sequence of str
 ///     The strings to be compared. They must all be the same length and have
 ///     an appropriate representation in bytes.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
 /// -------
 /// list of int
 ///     The Hamming distances among the strings.
-/// parallel: bool, default False
-///     Bool to specify if computation should be parallelized.
 ///
 /// Examples
 /// --------
@@ -83,7 +81,7 @@ fn hamming(s1: &str, s2: &str) -> PyResult<u32> {
 /// >>> assert(hamming_matrix(seqs, parallel=False) == [1, 3, 2])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, parallel=false))]
+#[pyo3(signature = (seqs, parallel=true))]
 fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_matrix(&seqs, parallel, "hamming"))
 }
@@ -99,7 +97,7 @@ fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 ///     The string against which all others will be compared.
 /// seqs : sequence of str
 ///     The other strings being compared.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -114,7 +112,7 @@ fn hamming_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// >>> assert(hamming_one_to_many(seq, seqs, parallel=False) == [1, 1, 3])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, parallel=false))]
+#[pyo3(signature = (seq, seqs, parallel=true))]
 fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_one_to_many(
         &seq, &seqs, parallel, "hamming",
@@ -132,7 +130,7 @@ fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<V
 ///     The first sequence of strings.
 /// seqs2 : sequence of str
 ///     The other sequence of strings.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -147,7 +145,7 @@ fn hamming_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<V
 /// >>> assert(hamming_many_to_many(seqs1, seqs2, parallel=False) == [1, 1, 3, 0, 1, 3])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_many_to_many(
         &seqs1, &seqs2, parallel, "hamming",
@@ -167,7 +165,7 @@ fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> P
 ///     The first sequence of strings.
 /// seqs2 : sequence of str
 ///     The other sequence of strings.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -182,7 +180,7 @@ fn hamming_many_to_many(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> P
 /// >>> assert(hamming_pairwise(seqs1, seqs2, parallel=False) == [1, 1])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn hamming_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_pairwise(
         &seqs1, &seqs2, parallel, "hamming",
@@ -203,7 +201,7 @@ fn hamming_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyRes
 ///     an appropriate representation in bytes.
 /// threshold : int
 ///     The largest Hamming distance used to consider a pair of strings neighbors.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -218,7 +216,7 @@ fn hamming_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyRes
 /// >>> assert(hamming_neighbor_matrix(seqs, 1, parallel=False) == [[0, 1, 1], [0, 3, 1], [1, 3, 1]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, threshold, parallel=false))]
+#[pyo3(signature = (seqs, threshold, parallel=true))]
 fn hamming_neighbor_matrix(
     seqs: Vec<&str>,
     threshold: u32,
@@ -242,7 +240,7 @@ fn hamming_neighbor_matrix(
 ///     The other strings being compared.
 /// threshold : int
 ///     The largest Hamming distance used to consider a pair of strings neighbors.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -258,7 +256,7 @@ fn hamming_neighbor_matrix(
 /// >>> assert(hamming_neighbor_one_to_many(seq, seqs, 1, parallel=False) == [[0, 1], [2, 0]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, threshold, parallel=false))]
+#[pyo3(signature = (seq, seqs, threshold, parallel=true))]
 fn hamming_neighbor_one_to_many(
     seq: &str,
     seqs: Vec<&str>,
@@ -285,7 +283,7 @@ fn hamming_neighbor_one_to_many(
 ///     The other sequence of strings.
 /// threshold : int
 ///     The largest Hamming distance used to consider a pair of strings neighbors.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -301,7 +299,7 @@ fn hamming_neighbor_one_to_many(
 /// >>> assert(hamming_neighbor_many_to_many(seqs1, seqs2, 1, parallel=False) == [[0, 0, 1], [2, 1, 1], [4, 0, 1]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=true))]
 fn hamming_neighbor_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -331,7 +329,7 @@ fn hamming_neighbor_many_to_many(
 ///     The other sequence of strings.
 /// threshold : int
 ///     The largest Hamming distance used to consider a pair of strings neighbors.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -348,7 +346,7 @@ fn hamming_neighbor_many_to_many(
 /// >>> assert(hamming_neighbor_pairwise(seqs1, seqs2, 1, parallel=False) == [[0, 1]])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=true))]
 fn hamming_neighbor_pairwise(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -374,7 +372,7 @@ fn hamming_neighbor_pairwise(
 ///     The first sequence of strings.
 /// seqs2 : sequence of str
 ///     The other sequence of strings.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -390,7 +388,7 @@ fn hamming_neighbor_pairwise(
 /// >>> assert out == [2, 0, 2, 16]
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn hamming_bin_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -437,7 +435,7 @@ fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
 /// seqs : sequence str
 ///     The strings to be compared. The must have an appropriate representation
 ///     as byte strings.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -451,7 +449,7 @@ fn levenshtein(s1: &str, s2: &str) -> PyResult<u32> {
 /// >>> assert(levenshtein_matrix(seqs, parallel=False) == [4, 5, 5, 4, 2, 5])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, parallel=false))]
+#[pyo3(signature = (seqs, parallel=true))]
 fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_matrix(&seqs, parallel, "levenshtein"))
 }
@@ -467,7 +465,7 @@ fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 ///     The string against which all others will be compared.
 /// seqs : sequence of str
 ///     The other strings being compared.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -482,7 +480,7 @@ fn levenshtein_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
 /// >>> assert(levenshtein_one_to_many(seq, seqs, parallel=False) == [2, 3, 5, 4])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, parallel=false))]
+#[pyo3(signature = (seq, seqs, parallel=true))]
 fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_one_to_many(
         &seq,
@@ -502,7 +500,7 @@ fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResu
 ///     The first sequence of strings.
 /// seqs : sequence of str
 ///     The second sequence of strings.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -517,7 +515,7 @@ fn levenshtein_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResu
 /// >>> assert(levenshtein_many_to_many(seqs1, seqs2, parallel=False) == [2, 3, 5, 5, 5, 6])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn levenshtein_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -533,7 +531,7 @@ fn levenshtein_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn levenshtein_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_pairwise(
         &seqs1,
@@ -544,7 +542,7 @@ fn levenshtein_pairwise(seqs1: Vec<&str>, seqs2: Vec<&str>, parallel: bool) -> P
 }
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, threshold, parallel=false))]
+#[pyo3(signature = (seqs, threshold, parallel=true))]
 fn levenshtein_neighbor_matrix(
     seqs: Vec<&str>,
     threshold: u32,
@@ -559,7 +557,7 @@ fn levenshtein_neighbor_matrix(
 }
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, threshold, parallel=false))]
+#[pyo3(signature = (seq, seqs, threshold, parallel=true))]
 fn levenshtein_neighbor_one_to_many(
     seq: &str,
     seqs: Vec<&str>,
@@ -576,7 +574,7 @@ fn levenshtein_neighbor_one_to_many(
 }
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=true))]
 fn levenshtein_neighbor_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -594,7 +592,7 @@ fn levenshtein_neighbor_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=true))]
 fn levenshtein_neighbor_pairwise(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -612,7 +610,7 @@ fn levenshtein_neighbor_pairwise(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn levenshtein_bin_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -669,7 +667,7 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
 /// seqs : sequence str
 ///     The strings to be compared. The must have an appropriate representation
 ///     as byte strings.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -683,7 +681,7 @@ fn levenshtein_exp(s1: &str, s2: &str) -> PyResult<u32> {
 /// >>> assert(levenshtein_exp_matrix(seqs, parallel=False) == [4, 5, 5, 4, 2, 5])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, parallel=false))]
+#[pyo3(signature = (seqs, parallel=true))]
 fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_matrix(
         &seqs,
@@ -705,7 +703,7 @@ fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>>
 ///     The string against which all others will be compared.
 /// seqs : sequence of str
 ///     The other strings being compared.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -720,7 +718,7 @@ fn levenshtein_exp_matrix(seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>>
 /// >>> assert(levenshtein_one_to_many(seq, seqs, parallel=False) == [2, 3, 5, 4])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, parallel=false))]
+#[pyo3(signature = (seq, seqs, parallel=true))]
 fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> PyResult<Vec<u32>> {
     Ok(_distance::str_cmp_one_to_many(
         &seq,
@@ -742,7 +740,7 @@ fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> Py
 ///     The first sequence of strings.
 /// seqs : sequence of str
 ///     The second sequence of strings.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -757,7 +755,7 @@ fn levenshtein_exp_one_to_many(seq: &str, seqs: Vec<&str>, parallel: bool) -> Py
 /// >>> assert(levenshtein_many_to_many(seqs1, seqs2, parallel=False) == [2, 3, 5, 5, 5, 6])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn levenshtein_exp_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -773,7 +771,7 @@ fn levenshtein_exp_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn levenshtein_exp_pairwise(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -788,7 +786,7 @@ fn levenshtein_exp_pairwise(
 }
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, threshold, parallel=false))]
+#[pyo3(signature = (seqs, threshold, parallel=true))]
 fn levenshtein_exp_neighbor_matrix(
     seqs: Vec<&str>,
     threshold: u32,
@@ -803,7 +801,7 @@ fn levenshtein_exp_neighbor_matrix(
 }
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, threshold, parallel=false))]
+#[pyo3(signature = (seq, seqs, threshold, parallel=true))]
 fn levenshtein_exp_neighbor_one_to_many(
     seq: &str,
     seqs: Vec<&str>,
@@ -820,7 +818,7 @@ fn levenshtein_exp_neighbor_one_to_many(
 }
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=true))]
 fn levenshtein_exp_neighbor_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -838,7 +836,7 @@ fn levenshtein_exp_neighbor_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, parallel=true))]
 fn levenshtein_exp_neighbor_pairwise(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -856,7 +854,7 @@ fn levenshtein_exp_neighbor_pairwise(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, parallel=true))]
 fn levenshtein_exp_bin_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -1026,10 +1024,10 @@ fn cdr2_distance(s1: &str, s2: &str) -> PyResult<u16> {
 ///     A string. Ideally, this should be a string of amino acid residues.
 /// s2 : str
 ///     A string. Ideally, this should be a string of amino acid residues.
-/// dist_weight : int, default 1
+/// dist_weight : int, default 3
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int, default 4
+/// gap_penalty : int, default 12
 ///     The penalty given to the difference in length of the strings.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
@@ -1060,7 +1058,7 @@ fn cdr2_distance(s1: &str, s2: &str) -> PyResult<u16> {
 /// >>> assert(dist == 40)
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (s1, s2, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false))]
+#[pyo3(signature = (s1, s2, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false))]
 fn tcrdist(
     s1: &str,
     s2: &str,
@@ -1089,10 +1087,10 @@ fn tcrdist(
 /// ----------
 /// seqs : sequence of str
 ///     Iterable of strings.
-/// dist_weight : int, default 1
+/// dist_weight : int, default 3
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int, default 4
+/// gap_penalty : int, default 12
 ///     The penalty given to the difference in length of the strings.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
@@ -1104,7 +1102,7 @@ fn tcrdist(
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1125,7 +1123,7 @@ fn tcrdist(
 /// >>> assert(dist == [40, 28, 28, 40, 40, 19])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seqs, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_matrix(
     seqs: Vec<&str>,
     dist_weight: u16,
@@ -1157,10 +1155,10 @@ fn tcrdist_matrix(
 ///     The string against which all others will be compared.
 /// seqs : str
 ///     The other strings being compared.
-/// dist_weight : int, default 1
+/// dist_weight : int, default 3
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int, default 4
+/// gap_penalty : int, default 12
 ///     The penalty given to the difference in length of the strings.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
@@ -1172,7 +1170,7 @@ fn tcrdist_matrix(
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1194,7 +1192,7 @@ fn tcrdist_matrix(
 /// >>> assert(dist == [52, 41, 52, 48])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seq, seqs, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_one_to_many(
     seq: &str,
     seqs: Vec<&str>,
@@ -1227,10 +1225,10 @@ fn tcrdist_one_to_many(
 ///     The first sequence of strings.
 /// seqs2 : sequence of str
 ///     The other sequence of strings.
-/// dist_weight : int, default 1
+/// dist_weight : int, default 3
 ///     A weight applied to the mismatch distances. This weight is not applied
 ///     to the gap penalties.
-/// gap_penalty : int, default 4
+/// gap_penalty : int, default 12
 ///     The penalty given to the difference in length of the strings.
 /// ntrim : int, default 3
 ///     The position at which the distance calculation will begin.
@@ -1242,7 +1240,7 @@ fn tcrdist_one_to_many(
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1263,7 +1261,7 @@ fn tcrdist_one_to_many(
 /// >>> assert(dist == [52, 41, 52, 48])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_many_to_many(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -1288,7 +1286,7 @@ fn tcrdist_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, dist_weight=1, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_pairwise(
     seqs1: Vec<&str>,
     seqs2: Vec<&str>,
@@ -1310,6 +1308,111 @@ fn tcrdist_pairwise(
         parallel,
     ))
 }
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs, threshold, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
+fn tcrdist_neighbor_matrix(
+    seqs: Vec<&str>,
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 3]>> {
+    Ok(_distance::tcrdist_neighbor_matrix(
+        &seqs,
+        threshold,
+        dist_weight,
+        gap_penalty,
+        ntrim,
+        ctrim,
+        fixed_gappos,
+        parallel,
+    ))
+}
+
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
+fn tcrdist_neighbor_pairwise(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::tcrdist_neighbor_pairwise(
+        &seqs1,
+        &seqs2,
+        threshold,
+        dist_weight,
+        gap_penalty,
+        ntrim,
+        ctrim,
+        fixed_gappos,
+        parallel,
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seq, seqs, threshold, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
+fn tcrdist_neighbor_one_to_many(
+    seq: &str,
+    seqs: Vec<&str>,
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 2]>> {
+    Ok(_distance::tcrdist_neighbor_one_to_many(
+        &seq,
+        &seqs,
+        threshold,
+        dist_weight,
+        gap_penalty,
+        ntrim,
+        ctrim,
+        fixed_gappos,
+        parallel,
+    ))
+}
+#[cfg(all(feature = "pyo3"))]
+#[pyfunction]
+#[pyo3(signature = (seqs1, seqs2, threshold, dist_weight=3, gap_penalty=12, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
+fn tcrdist_neighbor_many_to_many(
+    seqs1: Vec<&str>,
+    seqs2: Vec<&str>,
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> PyResult<Vec<[usize; 3]>> {
+    Ok(_distance::tcrdist_neighbor_many_to_many(
+        &seqs1,
+        &seqs2,
+        threshold,
+        dist_weight,
+        gap_penalty,
+        ntrim,
+        ctrim,
+        fixed_gappos,
+        parallel,
+    ))
+}
+
 /// Compute the tcrdist between two CDR3-V allele pairs.
 ///
 /// This incorporates differences between the pMHC, CDR1, CDR2, and CDR3.
@@ -1418,7 +1521,7 @@ fn tcrdist_allele(
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1441,7 +1544,7 @@ fn tcrdist_allele(
 /// >>> assert(dist == [168, 142, 134, 203, 163, 169, 148, 116, 189, 198])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seqs, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_allele_matrix(
     seqs: Vec<[&str; 2]>,
     phmc_weight: u16,
@@ -1498,7 +1601,7 @@ fn tcrdist_allele_matrix(
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1522,7 +1625,7 @@ fn tcrdist_allele_matrix(
 /// >>> assert(dist == [168, 142, 134, 203])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seq, seqs, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_allele_one_to_many(
     seq: [&str; 2],
     seqs: Vec<[&str; 2]>,
@@ -1581,7 +1684,7 @@ fn tcrdist_allele_one_to_many(
 ///     If True, insert gaps at a fixed position after the cysteine residue
 ///     starting the CDR3 (typically position 6). If False, find the "optimal"
 ///     position for inserting the gaps to make up the difference in length.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1605,7 +1708,7 @@ fn tcrdist_allele_one_to_many(
 /// >>> assert(dist == [168, 142, 134, 203, 104, 125, 143, 121])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_allele_many_to_many(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1636,7 +1739,7 @@ fn tcrdist_allele_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, phmc_weight=1, cdr1_weight=1, cdr2_weight=1, cdr3_weight=3, gap_penalty=4, ntrim=3, ctrim=2, fixed_gappos=false, parallel=true))]
 fn tcrdist_allele_pairwise(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1714,7 +1817,7 @@ fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyR
 /// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1731,7 +1834,7 @@ fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> PyR
 /// >>> assert(dist == [168, 142, 134, 203, 163, 169, 148, 116, 189, 198])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_matrix(
     seqs: Vec<[&str; 2]>,
     ntrim: usize,
@@ -1757,7 +1860,7 @@ fn tcrdist_gene_matrix(
 /// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1775,7 +1878,7 @@ fn tcrdist_gene_matrix(
 /// >>> assert(dist == [168, 142, 134, 203])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seq, seqs, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_one_to_many(
     seq: [&str; 2],
     seqs: Vec<[&str; 2]>,
@@ -1802,7 +1905,7 @@ fn tcrdist_gene_one_to_many(
 /// ctrim : int, default 2
 ///     The position, counted from the end, at which the calculation will end.
 ///     This parameter must be >= 0.
-/// parallel: bool, default False
+/// parallel : bool, default True
 ///     Bool to specify if computation should be parallelized.
 ///
 /// Returns
@@ -1820,7 +1923,7 @@ fn tcrdist_gene_one_to_many(
 /// >>> assert(dist == [168, 142, 134, 203, 104, 125, 143, 121])
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_many_to_many(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1835,7 +1938,7 @@ fn tcrdist_gene_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_pairwise(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1901,7 +2004,7 @@ fn tcrdist_gene_neighbor(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_neighbor_matrix(
     seqs: Vec<[&str; 2]>,
     threshold: u16,
@@ -1916,7 +2019,7 @@ fn tcrdist_gene_neighbor_matrix(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seq, seqs, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_neighbor_one_to_many(
     seq: [&str; 2],
     seqs: Vec<[&str; 2]>,
@@ -1932,7 +2035,7 @@ fn tcrdist_gene_neighbor_one_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_neighbor_many_to_many(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1948,7 +2051,7 @@ fn tcrdist_gene_neighbor_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_gene_neighbor_pairwise(
     seqs1: Vec<[&str; 2]>,
     seqs2: Vec<[&str; 2]>,
@@ -1971,7 +2074,7 @@ fn tcrdist_paired_gene(s1: [&str; 4], s2: [&str; 4], ntrim: usize, ctrim: usize)
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_matrix(
     seqs: Vec<[&str; 4]>,
     ntrim: usize,
@@ -1985,7 +2088,7 @@ fn tcrdist_paired_gene_matrix(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seq, seqs, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_one_to_many(
     seq: [&str; 4],
     seqs: Vec<[&str; 4]>,
@@ -2000,7 +2103,7 @@ fn tcrdist_paired_gene_one_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_many_to_many(
     seqs1: Vec<[&str; 4]>,
     seqs2: Vec<[&str; 4]>,
@@ -2015,7 +2118,7 @@ fn tcrdist_paired_gene_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_pairwise(
     seqs1: Vec<[&str; 4]>,
     seqs2: Vec<[&str; 4]>,
@@ -2030,7 +2133,7 @@ fn tcrdist_paired_gene_pairwise(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_neighbor_matrix(
     seqs: Vec<[&str; 4]>,
     threshold: u16,
@@ -2045,7 +2148,7 @@ fn tcrdist_paired_gene_neighbor_matrix(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seq, seqs, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seq, seqs, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_neighbor_one_to_many(
     seq: [&str; 4],
     seqs: Vec<[&str; 4]>,
@@ -2061,7 +2164,7 @@ fn tcrdist_paired_gene_neighbor_one_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_neighbor_many_to_many(
     seqs1: Vec<[&str; 4]>,
     seqs2: Vec<[&str; 4]>,
@@ -2077,7 +2180,7 @@ fn tcrdist_paired_gene_neighbor_many_to_many(
 
 #[cfg(all(feature = "pyo3"))]
 #[pyfunction]
-#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=false))]
+#[pyo3(signature = (seqs1, seqs2, threshold, ntrim=3, ctrim=2, parallel=true))]
 fn tcrdist_paired_gene_neighbor_pairwise(
     seqs1: Vec<[&str; 4]>,
     seqs2: Vec<[&str; 4]>,
@@ -2144,6 +2247,11 @@ pub fn tcrdist_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tcrdist_one_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_many_to_many, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_pairwise, m)?)?;
+
+    m.add_function(wrap_pyfunction!(tcrdist_neighbor_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_neighbor_one_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_neighbor_many_to_many, m)?)?;
+    m.add_function(wrap_pyfunction!(tcrdist_neighbor_pairwise, m)?)?;
 
     m.add_function(wrap_pyfunction!(tcrdist_allele, m)?)?;
     m.add_function(wrap_pyfunction!(tcrdist_allele_matrix, m)?)?;

@@ -63,7 +63,7 @@ pub fn tcrdist(
         for idx in ntrim..s1_len - ctrim {
             distance += match_table::amino_distances(&s1[idx], &s2[idx]);
         }
-        return distance;
+        return dist_weight * distance;
     }
 
     let len_diff: usize;
@@ -326,6 +326,355 @@ pub fn tcrdist_pairwise(
         })
     }
 }
+
+pub fn tcrdist_neighbor_matrix(
+    seqs: &[&str],
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> Vec<[usize; 3]> {
+    if parallel == false {
+        seqs.iter()
+            .enumerate()
+            .flat_map(|(idx, &s1)| {
+                seqs[idx + 1..]
+                    .iter()
+                    .enumerate()
+                    .fold(Vec::new(), |mut v, (jdx, &s2)| {
+                        let s1_bytes: &[u8] = s1.as_bytes();
+                        let s2_bytes: &[u8] = s2.as_bytes();
+                        let s1_len: usize = s1_bytes.len();
+                        let s2_len: usize = s2_bytes.len();
+                        let len_diff: u16 = if s1_len > s2_len {
+                            (s1_len - s2_len) as u16
+                        } else {
+                            (s2_len - s1_len) as u16
+                        };
+
+                        if len_diff * gap_penalty <= threshold {
+                            let dist: u16 = tcrdist(
+                                s1_bytes,
+                                s2_bytes,
+                                dist_weight,
+                                gap_penalty,
+                                ntrim,
+                                ctrim,
+                                fixed_gappos,
+                            );
+                            if dist <= threshold {
+                                v.push([idx, jdx + 1 + idx, dist as usize])
+                            };
+                        }
+                        v
+                    })
+            })
+            .collect::<Vec<[usize; 3]>>()
+    } else {
+        POOL.install(|| {
+            seqs.par_iter()
+                .enumerate()
+                .flat_map(|(idx, &s1)| {
+                    seqs[idx + 1..]
+                        .iter()
+                        .enumerate()
+                        .fold(Vec::new(), |mut v, (jdx, &s2)| {
+                            let s1_bytes: &[u8] = s1.as_bytes();
+                            let s2_bytes: &[u8] = s2.as_bytes();
+                            let s1_len: usize = s1_bytes.len();
+                            let s2_len: usize = s2_bytes.len();
+                            let len_diff: u16 = if s1_len > s2_len {
+                                (s1_len - s2_len) as u16
+                            } else {
+                                (s2_len - s1_len) as u16
+                            };
+
+                            if len_diff * gap_penalty <= threshold {
+                                let dist: u16 = tcrdist(
+                                    s1_bytes,
+                                    s2_bytes,
+                                    dist_weight,
+                                    gap_penalty,
+                                    ntrim,
+                                    ctrim,
+                                    fixed_gappos,
+                                );
+                                if dist <= threshold {
+                                    v.push([idx, jdx + 1 + idx, dist as usize])
+                                };
+                            }
+                            v
+                        })
+                })
+                .collect::<Vec<[usize; 3]>>()
+        })
+    }
+}
+
+pub fn tcrdist_neighbor_pairwise(
+    seqs1: &[&str],
+    seqs2: &[&str],
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> Vec<[usize; 2]> {
+    if parallel == false {
+        seqs1
+            .iter()
+            .enumerate()
+            .zip(seqs2.iter())
+            .fold(Vec::new(), |mut v, ((idx, &s1), &s2)| {
+                let s1_bytes: &[u8] = s1.as_bytes();
+                let s2_bytes: &[u8] = s2.as_bytes();
+                let s1_len: usize = s1_bytes.len();
+                let s2_len: usize = s2_bytes.len();
+                let len_diff: u16 = if s1_len > s2_len {
+                    (s1_len - s2_len) as u16
+                } else {
+                    (s2_len - s1_len) as u16
+                };
+
+                if len_diff * gap_penalty <= threshold {
+                    let dist: u16 = tcrdist(
+                        s1_bytes,
+                        s2_bytes,
+                        dist_weight,
+                        gap_penalty,
+                        ntrim,
+                        ctrim,
+                        fixed_gappos,
+                    );
+                    if dist <= threshold {
+                        v.push([idx, dist as usize])
+                    };
+                }
+                v
+            })
+    } else {
+        seqs1
+            .par_iter()
+            .enumerate()
+            .zip(seqs2.par_iter())
+            .fold(
+                || Vec::new(),
+                |mut v, ((idx, &s1), &s2)| {
+                    let s1_bytes: &[u8] = s1.as_bytes();
+                    let s2_bytes: &[u8] = s2.as_bytes();
+                    let s1_len: usize = s1_bytes.len();
+                    let s2_len: usize = s2_bytes.len();
+                    let len_diff: u16 = if s1_len > s2_len {
+                        (s1_len - s2_len) as u16
+                    } else {
+                        (s2_len - s1_len) as u16
+                    };
+
+                    if len_diff * gap_penalty <= threshold {
+                        let dist: u16 = tcrdist(
+                            s1_bytes,
+                            s2_bytes,
+                            dist_weight,
+                            gap_penalty,
+                            ntrim,
+                            ctrim,
+                            fixed_gappos,
+                        );
+                        if dist <= threshold {
+                            v.push([idx, dist as usize])
+                        };
+                    }
+                    v
+                },
+            )
+            .reduce(
+                || Vec::new(),
+                |mut combined, v| {
+                    combined.extend(v);
+                    combined
+                },
+            )
+    }
+}
+
+pub fn tcrdist_neighbor_one_to_many(
+    seq: &str,
+    seqs: &[&str],
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> Vec<[usize; 2]> {
+    let seq_bytes: &[u8] = seq.as_bytes();
+    let seq_len: usize = seq_bytes.len();
+
+    if parallel == false {
+        seqs.iter()
+            .enumerate()
+            .fold(Vec::new(), |mut v, (idx, &s)| {
+                let s_bytes: &[u8] = s.as_bytes();
+                let s_len: usize = s_bytes.len();
+                let len_diff: u16 = if seq_len > s_len {
+                    (seq_len - s_len) as u16
+                } else {
+                    (s_len - seq_len) as u16
+                };
+
+                if len_diff * gap_penalty <= threshold {
+                    let dist: u16 = tcrdist(
+                        seq_bytes,
+                        s_bytes,
+                        dist_weight,
+                        gap_penalty,
+                        ntrim,
+                        ctrim,
+                        fixed_gappos,
+                    );
+                    if dist <= threshold {
+                        v.push([idx, dist as usize])
+                    };
+                }
+                v
+            })
+    } else {
+        seqs.par_iter()
+            .enumerate()
+            .fold(
+                || Vec::new(),
+                |mut v, (idx, &s)| {
+                    let s_bytes: &[u8] = s.as_bytes();
+                    let s_len: usize = s_bytes.len();
+                    let len_diff: u16 = if seq_len > s_len {
+                        (seq_len - s_len) as u16
+                    } else {
+                        (s_len - seq_len) as u16
+                    };
+
+                    if len_diff * gap_penalty <= threshold {
+                        let dist: u16 = tcrdist(
+                            seq_bytes,
+                            s_bytes,
+                            dist_weight,
+                            gap_penalty,
+                            ntrim,
+                            ctrim,
+                            fixed_gappos,
+                        );
+                        if dist <= threshold {
+                            v.push([idx, dist as usize])
+                        };
+                    }
+                    v
+                },
+            )
+            .reduce(
+                || Vec::new(),
+                |mut combined, v| {
+                    combined.extend(v);
+                    combined
+                },
+            )
+    }
+}
+
+pub fn tcrdist_neighbor_many_to_many(
+    seqs1: &[&str],
+    seqs2: &[&str],
+    threshold: u16,
+    dist_weight: u16,
+    gap_penalty: u16,
+    ntrim: usize,
+    ctrim: usize,
+    fixed_gappos: bool,
+    parallel: bool,
+) -> Vec<[usize; 3]> {
+    if parallel == false {
+        seqs1
+            .iter()
+            .enumerate()
+            .flat_map(|(idx, &s1)| {
+                seqs2
+                    .iter()
+                    .enumerate()
+                    .fold(Vec::new(), |mut v, (jdx, &s2)| {
+                        let s1_bytes: &[u8] = s1.as_bytes();
+                        let s2_bytes: &[u8] = s2.as_bytes();
+                        let s1_len: usize = s1_bytes.len();
+                        let s2_len: usize = s2_bytes.len();
+                        let len_diff: u16 = if s1_len > s2_len {
+                            (s1_len - s2_len) as u16
+                        } else {
+                            (s2_len - s1_len) as u16
+                        };
+
+                        if len_diff * gap_penalty <= threshold {
+                            let dist: u16 = tcrdist(
+                                s1_bytes,
+                                s2_bytes,
+                                dist_weight,
+                                gap_penalty,
+                                ntrim,
+                                ctrim,
+                                fixed_gappos,
+                            );
+                            if dist <= threshold {
+                                v.push([idx, jdx, dist as usize])
+                            };
+                        }
+                        v
+                    })
+            })
+            .collect::<Vec<[usize; 3]>>()
+    } else {
+        POOL.install(|| {
+            seqs1
+                .par_iter()
+                .enumerate()
+                .flat_map(|(idx, &s1)| {
+                    seqs2
+                        .iter()
+                        .enumerate()
+                        .fold(Vec::new(), |mut v, (jdx, &s2)| {
+                            let s1_bytes: &[u8] = s1.as_bytes();
+                            let s2_bytes: &[u8] = s2.as_bytes();
+                            let s1_len: usize = s1_bytes.len();
+                            let s2_len: usize = s2_bytes.len();
+                            let len_diff: u16 = if s1_len > s2_len {
+                                (s1_len - s2_len) as u16
+                            } else {
+                                (s2_len - s1_len) as u16
+                            };
+
+                            if len_diff * gap_penalty <= threshold {
+                                let dist: u16 = tcrdist(
+                                    s1_bytes,
+                                    s2_bytes,
+                                    dist_weight,
+                                    gap_penalty,
+                                    ntrim,
+                                    ctrim,
+                                    fixed_gappos,
+                                );
+                                if dist <= threshold {
+                                    v.push([idx, jdx, dist as usize])
+                                };
+                            }
+                            v
+                        })
+                })
+                .collect::<Vec<[usize; 3]>>()
+        })
+    }
+}
+
 /// Compute the distance between V alleles which are written as byte strings.
 ///
 /// This function is memoized to speed up V alleles distance computations further.
@@ -676,11 +1025,11 @@ pub fn tcrdist_allele_pairwise(
 /// ```
 pub fn tcrdist_gene(s1: [&str; 2], s2: [&str; 2], ntrim: usize, ctrim: usize) -> u16 {
     total_distance(s1[1].as_bytes(), s2[1].as_bytes())
-        + 3 * tcrdist(
+        + tcrdist(
             s1[0].as_bytes(),
             s2[0].as_bytes(),
-            1,
-            4,
+            3,
+            12,
             ntrim,
             ctrim,
             false,
@@ -839,7 +1188,7 @@ pub fn tcrdist_gene_neighbor(
         return false;
     }
 
-    (v_gene_dist + 3 * tcrdist(s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false)) <= threshold
+    (v_gene_dist + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false)) <= threshold
 }
 
 pub fn tcrdist_gene_neighbor_matrix(
@@ -871,7 +1220,7 @@ pub fn tcrdist_gene_neighbor_matrix(
                             let v_gene_dist = total_distance(s1[1].as_bytes(), s2[1].as_bytes());
                             if v_gene_dist + len_diff <= threshold {
                                 let dist: u16 = v_gene_dist
-                                    + 3 * tcrdist(s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false);
+                                    + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                                 if dist <= threshold {
                                     v.push([idx, jdx + 1 + idx, dist as usize])
                                 };
@@ -905,9 +1254,7 @@ pub fn tcrdist_gene_neighbor_matrix(
                                     total_distance(s1[1].as_bytes(), s2[1].as_bytes());
                                 if v_gene_dist + len_diff <= threshold {
                                     let dist: u16 = v_gene_dist
-                                        + 3 * tcrdist(
-                                            s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false,
-                                        );
+                                        + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                                     if dist <= threshold {
                                         v.push([idx, jdx + 1 + idx, dist as usize])
                                     };
@@ -948,8 +1295,8 @@ pub fn tcrdist_gene_neighbor_pairwise(
                 if len_diff * 12 <= threshold {
                     let v_gene_dist = total_distance(s1[1].as_bytes(), s2[1].as_bytes());
                     if v_gene_dist + len_diff <= threshold {
-                        let dist: u16 = v_gene_dist
-                            + 3 * tcrdist(s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false);
+                        let dist: u16 =
+                            v_gene_dist + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                         if dist <= threshold {
                             v.push([idx, dist as usize])
                         };
@@ -979,7 +1326,7 @@ pub fn tcrdist_gene_neighbor_pairwise(
                         let v_gene_dist = total_distance(s1[1].as_bytes(), s2[1].as_bytes());
                         if v_gene_dist + len_diff <= threshold {
                             let dist: u16 = v_gene_dist
-                                + 3 * tcrdist(s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false);
+                                + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                             if dist <= threshold {
                                 v.push([idx, dist as usize])
                             };
@@ -1025,8 +1372,8 @@ pub fn tcrdist_gene_neighbor_one_to_many(
                 if len_diff * 12 <= threshold {
                     let v_gene_dist = total_distance(seq_v, s[1].as_bytes());
                     if v_gene_dist + len_diff <= threshold {
-                        let dist: u16 = v_gene_dist
-                            + 3 * tcrdist(seq_bytes, s_bytes, 1, 4, ntrim, ctrim, false);
+                        let dist: u16 =
+                            v_gene_dist + tcrdist(seq_bytes, s_bytes, 3, 12, ntrim, ctrim, false);
                         if dist <= threshold {
                             v.push([idx, dist as usize])
                         };
@@ -1052,7 +1399,7 @@ pub fn tcrdist_gene_neighbor_one_to_many(
                         let v_gene_dist = total_distance(seq_v, s[1].as_bytes());
                         if v_gene_dist + len_diff <= threshold {
                             let dist: u16 = v_gene_dist
-                                + 3 * tcrdist(seq_bytes, s_bytes, 1, 4, ntrim, ctrim, false);
+                                + tcrdist(seq_bytes, s_bytes, 3, 12, ntrim, ctrim, false);
                             if dist <= threshold {
                                 v.push([idx, dist as usize])
                             };
@@ -1102,7 +1449,7 @@ pub fn tcrdist_gene_neighbor_many_to_many(
                             let v_gene_dist = total_distance(s1[1].as_bytes(), s2[1].as_bytes());
                             if v_gene_dist + len_diff <= threshold {
                                 let dist: u16 = v_gene_dist
-                                    + 3 * tcrdist(s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false);
+                                    + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                                 if dist <= threshold {
                                     v.push([idx, jdx, dist as usize])
                                 };
@@ -1137,9 +1484,7 @@ pub fn tcrdist_gene_neighbor_many_to_many(
                                     total_distance(s1[1].as_bytes(), s2[1].as_bytes());
                                 if v_gene_dist + len_diff <= threshold {
                                     let dist: u16 = v_gene_dist
-                                        + 3 * tcrdist(
-                                            s1_bytes, s2_bytes, 1, 4, ntrim, ctrim, false,
-                                        );
+                                        + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                                     if dist <= threshold {
                                         v.push([idx, jdx, dist as usize])
                                     };
@@ -1156,20 +1501,20 @@ pub fn tcrdist_gene_neighbor_many_to_many(
 pub fn tcrdist_paired_gene(s1: [&str; 4], s2: [&str; 4], ntrim: usize, ctrim: usize) -> u16 {
     total_distance(s1[1].as_bytes(), s2[1].as_bytes())
         + total_distance(s1[3].as_bytes(), s2[3].as_bytes())
-        + 3 * tcrdist(
+        + tcrdist(
             s1[0].as_bytes(),
             s2[0].as_bytes(),
-            1,
-            4,
+            3,
+            12,
             ntrim,
             ctrim,
             false,
         )
-        + 3 * tcrdist(
+        + tcrdist(
             s1[2].as_bytes(),
             s2[2].as_bytes(),
-            1,
-            4,
+            3,
+            12,
             ntrim,
             ctrim,
             false,
@@ -1338,20 +1683,12 @@ pub fn tcrdist_paired_gene_neighbor_matrix(
                             let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                             if v_gene_dist + total_len_diff <= threshold {
                                 let dist: u16 = v_gene_dist
-                                    + 3 * tcrdist(
-                                        beta1_bytes,
-                                        beta2_bytes,
-                                        1,
-                                        4,
-                                        ntrim,
-                                        ctrim,
-                                        false,
-                                    )
-                                    + 3 * tcrdist(
+                                    + tcrdist(beta1_bytes, beta2_bytes, 3, 12, ntrim, ctrim, false)
+                                    + tcrdist(
                                         alpha1_bytes,
                                         alpha2_bytes,
-                                        1,
-                                        4,
+                                        3,
+                                        12,
                                         ntrim,
                                         ctrim,
                                         false,
@@ -1402,20 +1739,20 @@ pub fn tcrdist_paired_gene_neighbor_matrix(
                                 let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                                 if v_gene_dist + total_len_diff <= threshold {
                                     let dist: u16 = v_gene_dist
-                                        + 3 * tcrdist(
+                                        + tcrdist(
                                             beta1_bytes,
                                             beta2_bytes,
-                                            1,
-                                            4,
+                                            3,
+                                            12,
                                             ntrim,
                                             ctrim,
                                             false,
                                         )
-                                        + 3 * tcrdist(
+                                        + tcrdist(
                                             alpha1_bytes,
                                             alpha2_bytes,
-                                            1,
-                                            4,
+                                            3,
+                                            12,
                                             ntrim,
                                             ctrim,
                                             false,
@@ -1473,8 +1810,8 @@ pub fn tcrdist_paired_gene_neighbor_pairwise(
                     let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                     if v_gene_dist + total_len_diff <= threshold {
                         let dist: u16 = v_gene_dist
-                            + 3 * tcrdist(beta1_bytes, beta2_bytes, 1, 4, ntrim, ctrim, false)
-                            + 3 * tcrdist(alpha1_bytes, alpha2_bytes, 1, 4, ntrim, ctrim, false);
+                            + tcrdist(beta1_bytes, beta2_bytes, 3, 12, ntrim, ctrim, false)
+                            + tcrdist(alpha1_bytes, alpha2_bytes, 3, 12, ntrim, ctrim, false);
                         if dist <= threshold {
                             v.push([idx, dist as usize])
                         };
@@ -1516,16 +1853,8 @@ pub fn tcrdist_paired_gene_neighbor_pairwise(
                         let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                         if v_gene_dist + total_len_diff <= threshold {
                             let dist: u16 = v_gene_dist
-                                + 3 * tcrdist(beta1_bytes, beta2_bytes, 1, 4, ntrim, ctrim, false)
-                                + 3 * tcrdist(
-                                    alpha1_bytes,
-                                    alpha2_bytes,
-                                    1,
-                                    4,
-                                    ntrim,
-                                    ctrim,
-                                    false,
-                                );
+                                + tcrdist(beta1_bytes, beta2_bytes, 3, 12, ntrim, ctrim, false)
+                                + tcrdist(alpha1_bytes, alpha2_bytes, 3, 12, ntrim, ctrim, false);
                             if dist <= threshold {
                                 v.push([idx, dist as usize])
                             };
@@ -1585,8 +1914,8 @@ pub fn tcrdist_paired_gene_neighbor_one_to_many(
                     let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                     if v_gene_dist + total_len_diff <= threshold {
                         let dist: u16 = v_gene_dist
-                            + 3 * tcrdist(beta1_bytes, beta2_bytes, 1, 4, ntrim, ctrim, false)
-                            + 3 * tcrdist(alpha1_bytes, alpha2_bytes, 1, 4, ntrim, ctrim, false);
+                            + tcrdist(beta1_bytes, beta2_bytes, 3, 12, ntrim, ctrim, false)
+                            + tcrdist(alpha1_bytes, alpha2_bytes, 3, 12, ntrim, ctrim, false);
                         if dist <= threshold {
                             v.push([idx, dist as usize])
                         };
@@ -1622,16 +1951,8 @@ pub fn tcrdist_paired_gene_neighbor_one_to_many(
                         let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                         if v_gene_dist + total_len_diff <= threshold {
                             let dist: u16 = v_gene_dist
-                                + 3 * tcrdist(beta1_bytes, beta2_bytes, 1, 4, ntrim, ctrim, false)
-                                + 3 * tcrdist(
-                                    alpha1_bytes,
-                                    alpha2_bytes,
-                                    1,
-                                    4,
-                                    ntrim,
-                                    ctrim,
-                                    false,
-                                );
+                                + tcrdist(beta1_bytes, beta2_bytes, 3, 12, ntrim, ctrim, false)
+                                + tcrdist(alpha1_bytes, alpha2_bytes, 3, 12, ntrim, ctrim, false);
                             if dist <= threshold {
                                 v.push([idx, dist as usize])
                             };
@@ -1695,20 +2016,12 @@ pub fn tcrdist_paired_gene_neighbor_many_to_many(
                             let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                             if v_gene_dist + total_len_diff <= threshold {
                                 let dist: u16 = v_gene_dist
-                                    + 3 * tcrdist(
-                                        beta1_bytes,
-                                        beta2_bytes,
-                                        1,
-                                        4,
-                                        ntrim,
-                                        ctrim,
-                                        false,
-                                    )
-                                    + 3 * tcrdist(
+                                    + tcrdist(beta1_bytes, beta2_bytes, 3, 12, ntrim, ctrim, false)
+                                    + tcrdist(
                                         alpha1_bytes,
                                         alpha2_bytes,
-                                        1,
-                                        4,
+                                        3,
+                                        12,
                                         ntrim,
                                         ctrim,
                                         false,
@@ -1760,20 +2073,20 @@ pub fn tcrdist_paired_gene_neighbor_many_to_many(
                                 let v_gene_dist = beta_v_gene_dist + alpha_v_gene_dist;
                                 if v_gene_dist + total_len_diff <= threshold {
                                     let dist: u16 = v_gene_dist
-                                        + 3 * tcrdist(
+                                        + tcrdist(
                                             beta1_bytes,
                                             beta2_bytes,
-                                            1,
-                                            4,
+                                            3,
+                                            12,
                                             ntrim,
                                             ctrim,
                                             false,
                                         )
-                                        + 3 * tcrdist(
+                                        + tcrdist(
                                             alpha1_bytes,
                                             alpha2_bytes,
-                                            1,
-                                            4,
+                                            3,
+                                            12,
                                             ntrim,
                                             ctrim,
                                             false,
