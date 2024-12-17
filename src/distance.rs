@@ -366,7 +366,8 @@ pub fn tcrdist_neighbor_matrix(
                                 fixed_gappos,
                             );
                             if dist <= threshold {
-                                v.push([idx, jdx + 1 + idx, dist as usize])
+                                v.push([idx, jdx + 1 + idx, dist as usize]);
+                                v.push([jdx + 1 + idx, idx, dist as usize]);
                             };
                         }
                         v
@@ -403,7 +404,8 @@ pub fn tcrdist_neighbor_matrix(
                                     fixed_gappos,
                                 );
                                 if dist <= threshold {
-                                    v.push([idx, jdx + 1 + idx, dist as usize])
+                                    v.push([idx, jdx + 1 + idx, dist as usize]);
+                                    v.push([jdx + 1 + idx, idx, dist as usize]);
                                 };
                             }
                             v
@@ -1222,7 +1224,8 @@ pub fn tcrdist_gene_neighbor_matrix(
                                 let dist: u16 = v_gene_dist
                                     + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                                 if dist <= threshold {
-                                    v.push([idx, jdx + 1 + idx, dist as usize])
+                                    v.push([idx, jdx + 1 + idx, dist as usize]);
+                                    v.push([jdx + 1 + idx, idx, dist as usize]);
                                 };
                             }
                         }
@@ -1256,7 +1259,8 @@ pub fn tcrdist_gene_neighbor_matrix(
                                     let dist: u16 = v_gene_dist
                                         + tcrdist(s1_bytes, s2_bytes, 3, 12, ntrim, ctrim, false);
                                     if dist <= threshold {
-                                        v.push([idx, jdx + 1 + idx, dist as usize])
+                                        v.push([idx, jdx + 1 + idx, dist as usize]);
+                                        v.push([jdx + 1 + idx, idx, dist as usize]);
                                     };
                                 }
                             }
@@ -1694,7 +1698,8 @@ pub fn tcrdist_paired_gene_neighbor_matrix(
                                         false,
                                     );
                                 if dist <= threshold {
-                                    v.push([idx, jdx + 1 + idx, dist as usize])
+                                    v.push([idx, jdx + 1 + idx, dist as usize]);
+                                    v.push([jdx + 1 + idx, idx, dist as usize]);
                                 };
                             }
                         }
@@ -1758,7 +1763,8 @@ pub fn tcrdist_paired_gene_neighbor_matrix(
                                             false,
                                         );
                                     if dist <= threshold {
-                                        v.push([idx, jdx + 1 + idx, dist as usize])
+                                        v.push([idx, jdx + 1 + idx, dist as usize]);
+                                        v.push([jdx + 1 + idx, idx, dist as usize]);
                                     };
                                 }
                             }
@@ -2236,6 +2242,7 @@ pub fn str_neighbor_matrix(
                         let dist: u32 = metric_fn(s1.as_bytes(), s2.as_bytes());
                         if dist <= threshold {
                             v.push([idx, idx + 1 + jdx, dist as usize]);
+                            v.push([idx + 1 + jdx, idx, dist as usize]);
                         }
                         v
                     })
@@ -2253,6 +2260,7 @@ pub fn str_neighbor_matrix(
                             let dist: u32 = metric_fn(s1.as_bytes(), s2.as_bytes());
                             if dist <= threshold {
                                 v.push([idx, idx + 1 + jdx, dist as usize]);
+                                v.push([idx + 1 + jdx, idx, dist as usize]);
                             }
                             v
                         })
